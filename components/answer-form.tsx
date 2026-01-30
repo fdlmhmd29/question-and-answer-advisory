@@ -35,12 +35,12 @@ export function AnswerForm({ question, onSuccess }: AnswerFormProps) {
   useEffect(() => {
     async function fetchRegNumber() {
       if (selectedAdvisoryType) {
-        const regNum = await generateRegistrationNumber(selectedAdvisoryType);
+        const regNum = await generateRegistrationNumber(question.id, selectedAdvisoryType);
         setRegistrationNumber(regNum);
       }
     }
     fetchRegNumber();
-  }, [selectedAdvisoryType]);
+  }, [question.id, selectedAdvisoryType]);
 
   async function handleSubmit(formData: FormData) {
     setIsLoading(true);
@@ -100,7 +100,7 @@ export function AnswerForm({ question, onSuccess }: AnswerFormProps) {
               <SelectContent>
                 {question.jenis_advisory.map((id) => (
                   <SelectItem key={id} value={id}>
-                    {id}. {ADVISORY_TYPES.find((t) => t.id === id)?.label}
+                    {ADVISORY_TYPES.find((t) => t.id === id)?.label ?? id}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -116,7 +116,7 @@ export function AnswerForm({ question, onSuccess }: AnswerFormProps) {
             className="bg-muted font-mono"
           />
           <p className="text-xs text-muted-foreground">
-            Format: urutan antrian/kode jenis advisory/tahun
+            Format: nomor urut pertanyaan / nomor urut jenis advisory / dua digit tahun
           </p>
         </div>
 

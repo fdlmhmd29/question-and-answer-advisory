@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
-import { getQuestions } from "@/lib/questions";
+import { getQuestions, getQuestionCounts } from "@/lib/questions";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { QuestionsTable } from "@/components/questions-table";
-import { ExportButtons } from "@/components/export-buttons";
+import { PenjawabAddQuestionButton } from "@/components/penjawab-add-question-button";
 import type { QuestionFilter } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileQuestion, CheckCircle, Clock } from "lucide-react";
@@ -41,15 +41,10 @@ export default async function PenjawabDashboard({ searchParams }: PageProps) {
     page: parseInt(params.page || "1"),
   };
 
-  const { questions, totalPages, totalCount } = await getQuestions(
-    session.user.id,
-    "penjawab",
-    filter
-  );
-
-  // Get stats
-  const pendingCount = questions.filter((q) => q.status === "belum_dijawab").length;
-  const answeredCount = questions.filter((q) => q.status === "dijawab").length;
+  const [{ questions, totalPages, totalCount }, counts] = await Promise.all([
+    getQuestions(session.user.id, "penjawab", filter),
+    getQuestionCounts(),
+  ]);
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -65,10 +60,10 @@ export default async function PenjawabDashboard({ searchParams }: PageProps) {
                 Kelola dan jawab permohonan advisory
               </p>
             </div>
-            <ExportButtons questions={questions} />
+            <PenjawabAddQuestionButton />
           </div>
 
-          {/* Stats Cards */}
+          {/* Stats Cards - total keseluruhan, belum dijawab, sudah dijawab (global) */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -76,7 +71,7 @@ export default async function PenjawabDashboard({ searchParams }: PageProps) {
                 <FileQuestion className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{totalCount}</div>
+                <div className="text-2xl font-bold">{counts.total}</div>
               </CardContent>
             </Card>
             <Card>
@@ -85,7 +80,7 @@ export default async function PenjawabDashboard({ searchParams }: PageProps) {
                 <Clock className="h-4 w-4 text-amber-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-amber-600">{pendingCount}</div>
+                <div className="text-2xl font-bold text-amber-600">{counts.belum_dijawab}</div>
               </CardContent>
             </Card>
             <Card>
@@ -94,7 +89,7 @@ export default async function PenjawabDashboard({ searchParams }: PageProps) {
                 <CheckCircle className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">{answeredCount}</div>
+                <div className="text-2xl font-bold text-green-600">{counts.sudah_dijawab}</div>
               </CardContent>
             </Card>
           </div>

@@ -5,6 +5,29 @@ const sql = neon(process.env.DATABASE_URL!);
 
 const ITEMS_PER_PAGE = 5;
 
+/** Untuk dashboard penjawab: total, belum dijawab, sudah dijawab (global, bukan per halaman). */
+export async function getQuestionCounts(): Promise<{
+  total: number;
+  belum_dijawab: number;
+  sudah_dijawab: number;
+}> {
+  try {
+    const [totalRow, pendingRow, answeredRow] = await Promise.all([
+      sql`SELECT COUNT(*) as count FROM questions`,
+      sql`SELECT COUNT(*) as count FROM questions WHERE status = 'belum_dijawab'`,
+      sql`SELECT COUNT(*) as count FROM questions WHERE status = 'dijawab'`,
+    ]);
+    return {
+      total: parseInt(totalRow[0].count),
+      belum_dijawab: parseInt(pendingRow[0].count),
+      sudah_dijawab: parseInt(answeredRow[0].count),
+    };
+  } catch (error) {
+    console.error("Get question counts error:", error);
+    return { total: 0, belum_dijawab: 0, sudah_dijawab: 0 };
+  }
+}
+
 // Save question edit history
 async function saveQuestionHistory(
   questionId: string,
@@ -352,24 +375,47 @@ export async function answerQuestion(
   }
 }
 
-export async function getNextRegistrationNumber(jenisAdvisory: string): Promise<string> {
+/**
+ * Format: nomor_urut_pertanyaan / nomor_urut_jenis_advisory / dua_digit_tahun
+ * - nomor_urut_pertanyaan: urutan global pertanyaan (keberapa pertanyaan dikirim ke sistem)
+ * - nomor_urut_jenis_advisory: urutan jawaban untuk jenis advisory ini di tahun ini
+ * - dua_digit_tahun: dua digit terakhir tahun
+ */
+export async function getNextRegistrationNumber(
+  questionId: string,
+  jenisAdvisory: string
+): Promise<string> {
   try {
     const year = new Date().getFullYear();
-    
-    // Count existing answers for this advisory type this year
-    const result = await sql`
-      SELECT COUNT(*) as count 
-      FROM answers 
-      WHERE no_registrasi LIKE ${'%/' + jenisAdvisory + '/' + year}
+    const yearShort = year % 100;
+
+    const questionRow = await sql`
+      SELECT id, created_at FROM questions WHERE id = ${questionId}
     `;
-    
-    const count = parseInt(result[0].count) + 1;
-    const paddedCount = count.toString().padStart(3, "0");
-    
-    return `${paddedCount}/${jenisAdvisory}/${year}`;
-  } catch {
-    const year = new Date().getFullYear();
-    return `001/${jenisAdvisory}/${year}`;
+    if (questionRow.length === 0) {
+      return `1/1/${yearShort}`;
+    }
+
+    const createdAt = questionRow[0].created_at;
+
+    const [ordinalQuestionRow, ordinalJenisRow] = await Promise.all([
+      sql`SELECT COUNT(*) as count FROM questions WHERE created_at <= ${createdAt}`,
+      sql`
+        SELECT COUNT(*) as count FROM answers a
+        INNER JOIN questions q ON q.id = a.question_id
+        WHERE ${jenisAdvisory} = ANY(q.jenis_advisory)
+        AND EXTRACT(YEAR FROM a.tanggal_jawaban) = ${year}
+      `,
+    ]);
+
+    const nomorUrutPertanyaan = parseInt(ordinalQuestionRow[0].count);
+    const nomorUrutJenis = parseInt(ordinalJenisRow[0].count) + 1;
+
+    return `${nomorUrutPertanyaan}/${nomorUrutJenis}/${yearShort}`;
+  } catch (error) {
+    console.error("getNextRegistrationNumber error:", error);
+    const yearShort = new Date().getFullYear() % 100;
+    return `1/1/${yearShort}`;
   }
 }
 

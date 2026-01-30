@@ -160,7 +160,7 @@ export function ExportSingleQuestion({ question }: ExportSingleQuestionProps) {
       ctx.fillStyle = "#4b5563";
       ctx.font = "13px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
       const jenisText = question.jenis_advisory
-        .map((id) => `${id}. ${getAdvisoryLabel(id)}`)
+        .map((id) => getAdvisoryLabel(id))
         .join("  •  ");
       y = wrapText(
         jenisText,
@@ -374,7 +374,7 @@ export function ExportSingleQuestion({ question }: ExportSingleQuestionProps) {
                         key={id}
                         className="inline-block bg-slate-100 text-slate-700 text-xs px-2 py-1 rounded border"
                       >
-                        {id}. {getAdvisoryLabel(id)}
+                        {getAdvisoryLabel(id)}
                       </span>
                     ))}
                   </div>

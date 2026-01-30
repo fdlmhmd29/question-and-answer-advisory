@@ -45,7 +45,7 @@ export function QuestionDetail({ question, userRole }: QuestionDetailProps) {
           <Eye className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-7xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             Detail Pertanyaan
@@ -65,14 +65,15 @@ export function QuestionDetail({ question, userRole }: QuestionDetailProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-6">
-          {/* Informasi Pemohon */}
-          <div className="flex flex-col gap-4">
+        {/* Layout landscape: dua kolom saat ada jawaban */}
+        <div className={question.answer ? "grid grid-cols-2 gap-6 min-w-0" : "flex flex-col gap-6"}>
+          {/* Kolom kiri: Data Permohonan */}
+          <div className="flex flex-col gap-4 min-w-0">
             <h3 className="font-semibold flex items-center gap-2">
               <User className="h-4 w-4" />
               Informasi Pemohon
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+            <div className="grid grid-cols-2 gap-3 p-4 bg-muted/50 rounded-lg text-sm">
               <div>
                 <p className="text-xs text-muted-foreground">Nama Pemohon</p>
                 <p className="font-medium">{question.nama_pemohon}</p>
@@ -93,92 +94,78 @@ export function QuestionDetail({ question, userRole }: QuestionDetailProps) {
                 </p>
               </div>
             </div>
-          </div>
 
-          <Separator />
+            <div className="flex flex-col gap-2">
+              <h3 className="font-semibold flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Jenis Advisory
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {question.jenis_advisory.map((id) => (
+                  <Badge key={id} variant="outline">
+                    {getAdvisoryLabel(id)}
+                  </Badge>
+                ))}
+              </div>
+            </div>
 
-          {/* Jenis Advisory */}
-          <div className="flex flex-col gap-3">
-            <h3 className="font-semibold flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Jenis Advisory
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {question.jenis_advisory.map((id) => (
-                <Badge key={id} variant="outline">
-                  {id}. {getAdvisoryLabel(id)}
-                </Badge>
-              ))}
+            <div className="flex flex-col gap-2">
+              <h3 className="font-semibold">Data/Informasi Yang Diberikan</h3>
+              <div className="p-3 bg-muted/50 rounded-lg whitespace-pre-wrap text-sm max-h-40 overflow-y-auto">
+                {question.data_informasi}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <h3 className="font-semibold">Advisory Yang Diinginkan</h3>
+              <div className="p-3 bg-muted/50 rounded-lg whitespace-pre-wrap text-sm max-h-40 overflow-y-auto">
+                {question.advisory_diinginkan}
+              </div>
             </div>
           </div>
 
-          <Separator />
-
-          {/* Data/Informasi */}
-          <div className="flex flex-col gap-3">
-            <h3 className="font-semibold">Data/Informasi Yang Diberikan</h3>
-            <div className="p-4 bg-muted/50 rounded-lg whitespace-pre-wrap text-sm">
-              {question.data_informasi}
-            </div>
-          </div>
-
-          {/* Advisory Yang Diinginkan */}
-          <div className="flex flex-col gap-3">
-            <h3 className="font-semibold">Advisory Yang Diinginkan</h3>
-            <div className="p-4 bg-muted/50 rounded-lg whitespace-pre-wrap text-sm">
-              {question.advisory_diinginkan}
-            </div>
-          </div>
-
-          {/* Jawaban (jika ada) */}
-          {question.answer && (
-            <>
-              <Separator />
-              <div className="flex flex-col gap-4">
-                <h3 className="font-semibold text-green-700 flex items-center gap-2">
-                  <Building className="h-4 w-4" />
-                  Jawaban Advisory
-                </h3>
-                <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex flex-col gap-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <p className="text-xs text-muted-foreground">No. Registrasi</p>
-                      <p className="font-mono font-medium">{question.answer.no_registrasi}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Tanggal Jawaban</p>
-                      <p className="font-medium">
-                        {formatDate(question.answer.tanggal_jawaban)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Dijawab Oleh</p>
-                      <p className="font-medium">{question.answerer_name}</p>
-                    </div>
+          {/* Kolom kanan: Jawaban (landscape) */}
+          {question.answer ? (
+            <div className="flex flex-col gap-4 border-l pl-6 min-w-0">
+              <h3 className="font-semibold text-green-700 flex items-center gap-2">
+                <Building className="h-4 w-4" />
+                Jawaban Advisory
+              </h3>
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex flex-col gap-4 min-w-0">
+                <div className="flex flex-col gap-3 text-sm">
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">No. Registrasi</p>
+                    <p className="font-mono font-medium break-all">{question.answer.no_registrasi}</p>
                   </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-2">
-                      <em>Technical Advisory Note:</em>
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">Tanggal Jawaban</p>
+                    <p className="font-medium">
+                      {formatDate(question.answer.tanggal_jawaban)}
                     </p>
-                    <div className="p-3 bg-background rounded border whitespace-pre-wrap text-sm">
-                      {question.answer.technical_advisory_note}
-                    </div>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">Dijawab Oleh</p>
+                    <p className="font-medium">{question.answerer_name}</p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    <em>Technical Advisory Note:</em>
+                  </p>
+                  <div className="p-3 bg-background rounded border whitespace-pre-wrap text-sm max-h-48 overflow-y-auto">
+                    {question.answer.technical_advisory_note}
                   </div>
                 </div>
               </div>
-            </>
-          )}
-
-          {/* Form Jawab untuk Penjawab */}
-          {userRole === "penjawab" && question.status === "belum_dijawab" && (
-            <>
-              <Separator />
+            </div>
+          ) : userRole === "penjawab" ? (
+            <div className="border-l pl-6">
               <AnswerForm
                 question={question}
                 onSuccess={() => setOpen(false)}
               />
-            </>
-          )}
+            </div>
+          ) : null}
         </div>
       </DialogContent>
     </Dialog>
