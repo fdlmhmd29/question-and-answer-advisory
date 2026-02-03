@@ -101,7 +101,7 @@ export function QuestionForm({ mode, question, onSuccess, userName, triggerLabel
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-7xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] sm:w-[50vw] max-w-[50vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {mode === "create" ? "Buat Pertanyaan Baru" : "Edit Pertanyaan"}

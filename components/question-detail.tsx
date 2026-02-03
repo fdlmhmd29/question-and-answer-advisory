@@ -45,7 +45,7 @@ export function QuestionDetail({ question, userRole }: QuestionDetailProps) {
           <Eye className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-7xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] sm:w-[50vw] max-w-[50vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             Detail Pertanyaan

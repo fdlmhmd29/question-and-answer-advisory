@@ -315,7 +315,7 @@ export function ExportSingleQuestion({ question }: ExportSingleQuestionProps) {
           <ImageIcon className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-screen max-h-[90vh] overflow overflow-y-auto">
+      <DialogContent className="w-[95vw] sm:w-[50vw] max-w-[50vw] max-h-[90vh] overflow overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Preview Export - Technical Advisory Note</DialogTitle>
         </DialogHeader>
