@@ -55,12 +55,86 @@ export function QuestionForm({
     setIsLoading(true);
     setError(null);
 
-    // Add selected advisory types
-    selectedTypes.forEach((type) => {
-      formData.append("jenis_advisory", type);
-    });
-
     try {
+      // Client-side validation
+      const divisi_instansi = formData.get("divisi_instansi") as string;
+      const nama_pemohon = formData.get("nama_pemohon") as string;
+      const unit_bisnis = formData.get("unit_bisnis") as string;
+      const advisory_diinginkan = formData.get("advisory_diinginkan") as string;
+
+      // Validasi field text
+      if (!divisi_instansi?.trim()) {
+        setError("Divisi/Instansi Pemohon harus diisi");
+        setIsLoading(false);
+        return;
+      }
+      if (!nama_pemohon?.trim()) {
+        setError("Nama Pemohon harus diisi");
+        setIsLoading(false);
+        return;
+      }
+      if (!unit_bisnis?.trim()) {
+        setError("Unit Bisnis/Proyek/Anak Usaha harus diisi");
+        setIsLoading(false);
+        return;
+      }
+      if (!advisory_diinginkan?.trim()) {
+        setError("Advisory Yang Diinginkan harus diisi");
+        setIsLoading(false);
+        return;
+      }
+
+      // Get data from Plate editor
+      const editorValue = editor?.api?.getSerializedValue();
+      let editorContent = "";
+
+      if (editorValue && Array.isArray(editorValue)) {
+        // Extract text from editor blocks
+        editorContent = editorValue
+          .map((block: any) => {
+            if (block.children && Array.isArray(block.children)) {
+              return block.children
+                .map((child: any) => child.text || "")
+                .join("");
+            }
+            return "";
+          })
+          .filter((text: string) => text.trim())
+          .join("\n");
+      } else if (editorValue && typeof editorValue === "object") {
+        editorContent = JSON.stringify(editorValue);
+      }
+
+      if (!editorContent?.trim()) {
+        setError("Data/Informasi Yang Diberikan harus diisi");
+        setIsLoading(false);
+        return;
+      }
+
+      // Set editor content to hidden field
+      const hiddenInput = document.getElementById(
+        "data_informasi_hidden"
+      ) as HTMLInputElement;
+      if (hiddenInput) {
+        hiddenInput.value = editorContent;
+      }
+      formData.set("data_informasi", editorContent);
+
+      // Validasi advisory types
+      if (selectedTypes.length === 0) {
+        setError("Pilih minimal 1 jenis advisory");
+        setIsLoading(false);
+        return;
+      }
+
+      // Add selected advisory types
+      selectedTypes.forEach((type) => {
+        formData.append("jenis_advisory", type);
+      });
+
+      console.log("[v0] Form validation passed, submitting...");
+      console.log("[v0] Editor content:", editorContent);
+
       const result =
         mode === "create"
           ? await submitQuestion(formData)
@@ -73,8 +147,9 @@ export function QuestionForm({
         setSelectedTypes([]);
         onSuccess?.();
       }
-    } catch {
-      setError("Terjadi kesalahan");
+    } catch (err) {
+      console.error("[v0] Form submission error:", err);
+      setError("Terjadi kesalahan saat mengirim form");
     } finally {
       setIsLoading(false);
     }
@@ -124,6 +199,14 @@ export function QuestionForm({
             </div>
           )}
 
+          {/* Hidden field untuk menyimpan data dari rich text editor */}
+          <input
+            type="hidden"
+            name="data_informasi"
+            id="data_informasi_hidden"
+            value=""
+          />
+
           {/* Layout landscape: dua kolom */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-4">
             <div className="flex flex-col gap-4">
@@ -138,6 +221,7 @@ export function QuestionForm({
                     defaultValue={question?.divisi_instansi}
                     placeholder="Masukkan divisi/instansi"
                     required
+                    minLength={1}
                   />
                 </div>
                 <div className="flex flex-col gap-2">
@@ -148,6 +232,7 @@ export function QuestionForm({
                     defaultValue={question?.nama_pemohon || userName}
                     placeholder="Masukkan nama pemohon"
                     required
+                    minLength={1}
                   />
                 </div>
               </div>
@@ -162,22 +247,21 @@ export function QuestionForm({
                   defaultValue={question?.unit_bisnis}
                   placeholder="Masukkan unit bisnis"
                   required
+                  minLength={1}
                 />
               </div>
 
               <div className="flex flex-col gap-2">
-                <Label htmlFor="data_informasi">
+                <Label htmlFor="data_informasi_editor">
                   Data/Informasi Yang Diberikan
                 </Label>
                 <Plate editor={editor}>
                   <EditorContainer>
                     <Editor
-                      id="data_informasi"
-                      name="data_informasi"
-                      defaultValue={question?.data_informasi}
+                      id="data_informasi_editor"
+                      defaultValue={question?.data_informasi ? JSON.parse(question.data_informasi) : undefined}
                       placeholder="Jelaskan data/informasi yang diberikan..."
                       rows={5}
-                      required
                     />
                   </EditorContainer>
                 </Plate>
@@ -193,6 +277,7 @@ export function QuestionForm({
                   placeholder="Jelaskan advisory yang diinginkan..."
                   rows={5}
                   required
+                  minLength={1}
                 />
               </div>
             </div>

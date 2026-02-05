@@ -17,22 +17,31 @@ export async function submitQuestion(formData: FormData) {
     return { error: "Unauthorized" };
   }
 
-  const divisi_instansi = formData.get("divisi_instansi") as string;
-  const nama_pemohon = formData.get("nama_pemohon") as string;
-  const unit_bisnis = formData.get("unit_bisnis") as string;
-  const data_informasi = formData.get("data_informasi") as string;
-  const advisory_diinginkan = formData.get("advisory_diinginkan") as string;
+  const divisi_instansi = (formData.get("divisi_instansi") as string)?.trim();
+  const nama_pemohon = (formData.get("nama_pemohon") as string)?.trim();
+  const unit_bisnis = (formData.get("unit_bisnis") as string)?.trim();
+  const data_informasi = (formData.get("data_informasi") as string)?.trim();
+  const advisory_diinginkan = (formData.get("advisory_diinginkan") as string)?.trim();
   const jenis_advisory = formData.getAll("jenis_advisory") as string[];
 
-  if (
-    !divisi_instansi ||
-    !nama_pemohon ||
-    !unit_bisnis ||
-    !data_informasi ||
-    !advisory_diinginkan ||
-    jenis_advisory.length === 0
-  ) {
-    return { error: "Semua field harus diisi" };
+  // Validasi dengan pesan spesifik
+  if (!divisi_instansi) {
+    return { error: "Divisi/Instansi Pemohon harus diisi" };
+  }
+  if (!nama_pemohon) {
+    return { error: "Nama Pemohon harus diisi" };
+  }
+  if (!unit_bisnis) {
+    return { error: "Unit Bisnis/Proyek/Anak Usaha harus diisi" };
+  }
+  if (!data_informasi) {
+    return { error: "Data/Informasi Yang Diberikan harus diisi" };
+  }
+  if (!advisory_diinginkan) {
+    return { error: "Advisory Yang Diinginkan harus diisi" };
+  }
+  if (jenis_advisory.length === 0) {
+    return { error: "Pilih minimal 1 jenis advisory" };
   }
 
   const result = await createQuestion(session.user.id, {
@@ -60,22 +69,31 @@ export async function editQuestion(questionId: string, formData: FormData) {
     return { error: "Unauthorized" };
   }
 
-  const divisi_instansi = formData.get("divisi_instansi") as string;
-  const nama_pemohon = formData.get("nama_pemohon") as string;
-  const unit_bisnis = formData.get("unit_bisnis") as string;
-  const data_informasi = formData.get("data_informasi") as string;
-  const advisory_diinginkan = formData.get("advisory_diinginkan") as string;
+  const divisi_instansi = (formData.get("divisi_instansi") as string)?.trim();
+  const nama_pemohon = (formData.get("nama_pemohon") as string)?.trim();
+  const unit_bisnis = (formData.get("unit_bisnis") as string)?.trim();
+  const data_informasi = (formData.get("data_informasi") as string)?.trim();
+  const advisory_diinginkan = (formData.get("advisory_diinginkan") as string)?.trim();
   const jenis_advisory = formData.getAll("jenis_advisory") as string[];
 
-  if (
-    !divisi_instansi ||
-    !nama_pemohon ||
-    !unit_bisnis ||
-    !data_informasi ||
-    !advisory_diinginkan ||
-    jenis_advisory.length === 0
-  ) {
-    return { error: "Semua field harus diisi" };
+  // Validasi dengan pesan spesifik
+  if (!divisi_instansi) {
+    return { error: "Divisi/Instansi Pemohon harus diisi" };
+  }
+  if (!nama_pemohon) {
+    return { error: "Nama Pemohon harus diisi" };
+  }
+  if (!unit_bisnis) {
+    return { error: "Unit Bisnis/Proyek/Anak Usaha harus diisi" };
+  }
+  if (!data_informasi) {
+    return { error: "Data/Informasi Yang Diberikan harus diisi" };
+  }
+  if (!advisory_diinginkan) {
+    return { error: "Advisory Yang Diinginkan harus diisi" };
+  }
+  if (jenis_advisory.length === 0) {
+    return { error: "Pilih minimal 1 jenis advisory" };
   }
 
   const result = await updateQuestion(questionId, session.user.id, {
