@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,8 +46,10 @@ export function QuestionForm({
   const [selectedTypes, setSelectedTypes] = useState<string[]>(
     question?.jenis_advisory || [],
   );
-  const [editorValue, setEditorValue] = useState<any>(null);
-  const editor = usePlateEditor();
+  const editorRef = React.useRef<any>(null);
+  const [editorValue, setEditorValue] = useState<any>(
+    question?.data_informasi ? JSON.parse(question.data_informasi) : undefined,
+  );
 
   const today = new Date().toLocaleDateString("id-ID", {
     weekday: "long",
@@ -87,27 +91,31 @@ export function QuestionForm({
         return;
       }
 
-      // Get data from Plate editor state
+      // Get data from Plate editor ref
       let editorContent = "";
 
-      if (editorValue && Array.isArray(editorValue)) {
-        // Extract text from editor blocks
-        editorContent = editorValue
-          .map((block: any) => {
-            if (block.children && Array.isArray(block.children)) {
-              return block.children
-                .map((child: any) => child.text || "")
-                .join("");
-            }
-            return "";
-          })
-          .filter((text: string) => text.trim())
-          .join("\n");
-      } else if (editorValue && typeof editorValue === "object") {
-        editorContent = JSON.stringify(editorValue);
+      if (editorRef.current) {
+        const editorValue = editorRef.current.api?.getValue?.();
+        console.log("[v0] Editor ref value:", editorValue);
+
+        if (editorValue && Array.isArray(editorValue)) {
+          // Extract text from editor blocks
+          editorContent = editorValue
+            .map((block: any) => {
+              if (block.children && Array.isArray(block.children)) {
+                return block.children
+                  .map((child: any) => child.text || "")
+                  .join("");
+              }
+              return "";
+            })
+            .filter((text: string) => text.trim())
+            .join("\n");
+        } else if (editorValue && typeof editorValue === "object") {
+          editorContent = JSON.stringify(editorValue);
+        }
       }
 
-      console.log("[v0] Editor value from state:", editorValue);
       console.log("[v0] Editor content extracted:", editorContent);
 
       if (!editorContent?.trim()) {
@@ -259,8 +267,8 @@ export function QuestionForm({
                   Data/Informasi Yang Diberikan
                 </Label>
                 <PlateEditorWrapper
+                  ref={editorRef}
                   defaultValue={question?.data_informasi ? JSON.parse(question.data_informasi) : undefined}
-                  onValueChange={setEditorValue}
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -336,17 +344,17 @@ export function QuestionForm({
 }
 
 // Component to capture editor value from Plate context
-function PlateEditorWrapper({
-  defaultValue,
-  onValueChange,
-}: {
-  defaultValue?: any;
-  onValueChange: (value: any) => void;
-}) {
+const PlateEditorWrapper = React.forwardRef<
+  any,
+  {
+    defaultValue?: any;
+  }
+>(({ defaultValue }, ref) => {
   const editor = usePlateEditor({
     value: defaultValue,
-    onChange: onValueChange,
   });
+
+  React.useImperativeHandle(ref, () => editor, [editor]);
 
   return (
     <Plate editor={editor}>
@@ -358,4 +366,4 @@ function PlateEditorWrapper({
       </EditorContainer>
     </Plate>
   );
-}
+});
