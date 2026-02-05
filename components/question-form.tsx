@@ -189,7 +189,7 @@ export function QuestionForm({
               </div>
             </div>
             <div className="flex flex-col gap-3">
-              <Label>Jenis Advisory (dapat memilih lebih dari 1)</Label>
+              <Label>Jenis Pekerjaan (dapat memilih lebih dari 1)</Label>
               <div className="grid grid-cols-1 gap-2 p-4 border rounded-md max-h-[420px] overflow-y-auto">
                 {ADVISORY_TYPES.map((type) => (
                   <div key={type.id} className="flex items-start gap-2">
