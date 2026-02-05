@@ -18,6 +18,8 @@ import { submitQuestion, editQuestion } from "@/app/actions/questions";
 import { ADVISORY_TYPES } from "@/lib/types";
 import type { Question } from "@/lib/types";
 import { Loader2, Plus, Pencil } from "lucide-react";
+import { Plate, usePlateEditor } from "platejs/react";
+import { Editor, EditorContainer } from "./ui/editor";
 
 interface QuestionFormProps {
   mode: "create" | "edit";
@@ -85,6 +87,8 @@ export function QuestionForm({
         : [...prev, typeId],
     );
   }
+
+  const editor = usePlateEditor();
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -165,14 +169,18 @@ export function QuestionForm({
                 <Label htmlFor="data_informasi">
                   Data/Informasi Yang Diberikan
                 </Label>
-                <Textarea
-                  id="data_informasi"
-                  name="data_informasi"
-                  defaultValue={question?.data_informasi}
-                  placeholder="Jelaskan data/informasi yang diberikan..."
-                  rows={5}
-                  required
-                />
+                <Plate editor={editor}>
+                  <EditorContainer>
+                    <Editor
+                      id="data_informasi"
+                      name="data_informasi"
+                      defaultValue={question?.data_informasi}
+                      placeholder="Jelaskan data/informasi yang diberikan..."
+                      rows={5}
+                      required
+                    />
+                  </EditorContainer>
+                </Plate>
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="advisory_diinginkan">
