@@ -13,7 +13,7 @@ import {
 export async function submitQuestion(formData: FormData) {
   const session = await getSession();
 
-  if (!session || session.user.role !== "penanya") {
+  if (!session || (session.user.role !== "penanya" && session.user.role !== "penjawab")) {
     return { error: "Unauthorized" };
   }
 
@@ -49,6 +49,7 @@ export async function submitQuestion(formData: FormData) {
   }
 
   revalidatePath("/dashboard/penanya", "max");
+  revalidatePath("/dashboard/penjawab", "max");
   return { success: true };
 }
 
@@ -138,6 +139,6 @@ export async function submitAnswer(questionId: string, formData: FormData) {
   return { success: true };
 }
 
-export async function generateRegistrationNumber(jenisAdvisory: string) {
-  return await getNextRegistrationNumber(jenisAdvisory);
+export async function generateRegistrationNumber(questionId: string, jenisAdvisory: string) {
+  return await getNextRegistrationNumber(questionId, jenisAdvisory);
 }

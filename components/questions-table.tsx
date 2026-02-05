@@ -273,7 +273,7 @@ export function QuestionsTable({
                     <div className="flex flex-wrap gap-1">
                       {q.jenis_advisory.slice(0, 2).map((id) => (
                         <Badge key={id} variant="secondary" className="text-xs">
-                          {id}
+                          {getAdvisoryLabel(id)}
                         </Badge>
                       ))}
                       {q.jenis_advisory.length > 2 && (
