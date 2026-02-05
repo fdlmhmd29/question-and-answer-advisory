@@ -7,6 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -96,7 +103,7 @@ export function QuestionForm({
         {mode === "create" ? (
           <Button>
             <Plus className="h-4 w-4 mr-2" />
-            {triggerLabel ?? "Tambah Pertanyaan Manual"}
+            {triggerLabel ?? "Buat Pertanyaan Baru"}
           </Button>
         ) : (
           <Button variant="ghost" size="sm">
@@ -107,7 +114,7 @@ export function QuestionForm({
       <DialogContent className="w-[95vw] sm:w-[50vw] max-w-[50vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {mode === "create" ? "Tambah Pertanyaan Manual" : "Edit Pertanyaan"}
+            {mode === "create" ? "Buat Pertanyaan Baru" : "Edit Pertanyaan"}
           </DialogTitle>
           <DialogDescription>
             Lengkapi form di bawah untuk{" "}
@@ -125,9 +132,9 @@ export function QuestionForm({
           )}
 
           {/* Layout landscape: dua kolom */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-4">
+          <div className="grid grid-cols-2 gap-6">
             <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="divisi_instansi">
                     Divisi/Instansi Pemohon
@@ -151,36 +158,36 @@ export function QuestionForm({
                   />
                 </div>
               </div>
-
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="unit_bisnis">
-                  Unit Bisnis/Proyek/Anak Usaha
-                </Label>
-                <Input
-                  id="unit_bisnis"
-                  name="unit_bisnis"
-                  defaultValue={question?.unit_bisnis}
-                  placeholder="Masukkan unit bisnis"
-                  required
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="unit_bisnis">
+                    Unit Bisnis/Proyek/Anak Usaha
+                  </Label>
+                  <Input
+                    id="unit_bisnis"
+                    name="unit_bisnis"
+                    defaultValue={question?.unit_bisnis}
+                    placeholder="Masukkan unit bisnis"
+                    required
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label>Hari/Tanggal Permohonan</Label>
+                  <Input value={today} disabled className="bg-muted" />
+                </div>
               </div>
-
               <div className="flex flex-col gap-2">
                 <Label htmlFor="data_informasi">
                   Data/Informasi Yang Diberikan
                 </Label>
-                <Plate editor={editor}>
-                  <EditorContainer>
-                    <Editor
-                      id="data_informasi"
-                      name="data_informasi"
-                      defaultValue={question?.data_informasi}
-                      placeholder="Jelaskan data/informasi yang diberikan..."
-                      rows={5}
-                      required
-                    />
-                  </EditorContainer>
-                </Plate>
+                <Textarea
+                  id="data_informasi"
+                  name="data_informasi"
+                  defaultValue={question?.data_informasi}
+                  placeholder="Jelaskan data/informasi yang diberikan..."
+                  rows={5}
+                  required
+                />
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="advisory_diinginkan">
