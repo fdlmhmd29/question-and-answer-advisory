@@ -7,13 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -35,12 +28,18 @@ interface QuestionFormProps {
   triggerLabel?: string;
 }
 
-export function QuestionForm({ mode, question, onSuccess, userName, triggerLabel }: QuestionFormProps) {
+export function QuestionForm({
+  mode,
+  question,
+  onSuccess,
+  userName,
+  triggerLabel,
+}: QuestionFormProps) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTypes, setSelectedTypes] = useState<string[]>(
-    question?.jenis_advisory || []
+    question?.jenis_advisory || [],
   );
 
   const today = new Date().toLocaleDateString("id-ID", {
@@ -83,7 +82,7 @@ export function QuestionForm({ mode, question, onSuccess, userName, triggerLabel
     setSelectedTypes((prev) =>
       prev.includes(typeId)
         ? prev.filter((t) => t !== typeId)
-        : [...prev, typeId]
+        : [...prev, typeId],
     );
   }
 
@@ -93,7 +92,7 @@ export function QuestionForm({ mode, question, onSuccess, userName, triggerLabel
         {mode === "create" ? (
           <Button>
             <Plus className="h-4 w-4 mr-2" />
-            {triggerLabel ?? "Buat Pertanyaan Baru"}
+            {triggerLabel ?? "Tambah Pertanyaan Manual"}
           </Button>
         ) : (
           <Button variant="ghost" size="sm">
@@ -104,11 +103,13 @@ export function QuestionForm({ mode, question, onSuccess, userName, triggerLabel
       <DialogContent className="w-[95vw] sm:w-[50vw] max-w-[50vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {mode === "create" ? "Buat Pertanyaan Baru" : "Edit Pertanyaan"}
+            {mode === "create" ? "Tambah Pertanyaan Manual" : "Edit Pertanyaan"}
           </DialogTitle>
           <DialogDescription>
             Lengkapi form di bawah untuk{" "}
-            {mode === "create" ? "mengajukan advisory" : "mengupdate pertanyaan"}
+            {mode === "create"
+              ? "mengajukan advisory"
+              : "mengupdate pertanyaan"}
           </DialogDescription>
         </DialogHeader>
 
@@ -120,11 +121,13 @@ export function QuestionForm({ mode, question, onSuccess, userName, triggerLabel
           )}
 
           {/* Layout landscape: dua kolom */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-4">
             <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="divisi_instansi">Divisi/Instansi Pemohon</Label>
+                  <Label htmlFor="divisi_instansi">
+                    Divisi/Instansi Pemohon
+                  </Label>
                   <Input
                     id="divisi_instansi"
                     name="divisi_instansi"
@@ -144,24 +147,24 @@ export function QuestionForm({ mode, question, onSuccess, userName, triggerLabel
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="unit_bisnis">Unit Bisnis/Proyek/Anak Usaha</Label>
-                  <Input
-                    id="unit_bisnis"
-                    name="unit_bisnis"
-                    defaultValue={question?.unit_bisnis}
-                    placeholder="Masukkan unit bisnis"
-                    required
-                  />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label>Hari/Tanggal Permohonan</Label>
-                  <Input value={today} disabled className="bg-muted" />
-                </div>
-              </div>
+
               <div className="flex flex-col gap-2">
-                <Label htmlFor="data_informasi">Data/Informasi Yang Diberikan</Label>
+                <Label htmlFor="unit_bisnis">
+                  Unit Bisnis/Proyek/Anak Usaha
+                </Label>
+                <Input
+                  id="unit_bisnis"
+                  name="unit_bisnis"
+                  defaultValue={question?.unit_bisnis}
+                  placeholder="Masukkan unit bisnis"
+                  required
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="data_informasi">
+                  Data/Informasi Yang Diberikan
+                </Label>
                 <Textarea
                   id="data_informasi"
                   name="data_informasi"
@@ -172,7 +175,9 @@ export function QuestionForm({ mode, question, onSuccess, userName, triggerLabel
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="advisory_diinginkan">Advisory Yang Diinginkan</Label>
+                <Label htmlFor="advisory_diinginkan">
+                  Advisory Yang Diinginkan
+                </Label>
                 <Textarea
                   id="advisory_diinginkan"
                   name="advisory_diinginkan"
