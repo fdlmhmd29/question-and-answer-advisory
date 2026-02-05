@@ -1,0 +1,135 @@
+========================================
+ENVIRONMENT VARIABLES - Advisory System
+========================================
+
+Connected Integrations:
+- Neon PostgreSQL Database
+- Vercel AI Gateway
+
+========================================
+DATABASE CONFIGURATION (Neon)
+========================================
+
+DATABASE_URL=
+Description: Main connection string for Neon database (with connection pooling)
+Usage: Used in lib/db.ts for SQL queries
+
+DATABASE_URL_UNPOOLED=
+Description: Direct connection without connection pooling
+Usage: For migrations and administrative operations
+
+POSTGRES_URL=
+Description: PostgreSQL connection URL
+Usage: Alternative database connection
+
+POSTGRES_PRISMA_URL=
+Description: Prisma-compatible PostgreSQL URL
+Usage: For Prisma ORM operations
+
+POSTGRES_URL_NON_POOLING=
+Description: Non-pooled PostgreSQL connection
+Usage: Direct database connections
+
+POSTGRES_URL_NO_SSL=
+Description: PostgreSQL connection without SSL
+Usage: For local development environment
+
+========================================
+DATABASE CREDENTIALS
+========================================
+
+POSTGRES_HOST=
+Description: Database host address
+Usage: Database server hostname
+
+PGHOST=
+Description: PostgreSQL host (alternative)
+Usage: Used by PostgreSQL client tools
+
+PGHOST_UNPOOLED=
+Description: Unpooled PostgreSQL host
+Usage: Direct connections without pooling
+
+POSTGRES_USER=
+Description: Database username
+Usage: Authentication credential
+
+PGUSER=
+Description: PostgreSQL user (alternative)
+Usage: Used by PostgreSQL client tools
+
+POSTGRES_PASSWORD=
+Description: Database password
+Usage: Authentication credential
+
+PGPASSWORD=
+Description: PostgreSQL password (alternative)
+Usage: Used by PostgreSQL client tools
+
+POSTGRES_DATABASE=
+Description: Database name
+Usage: Default database to connect to
+
+PGDATABASE=
+Description: PostgreSQL database name (alternative)
+Usage: Used by PostgreSQL client tools
+
+========================================
+NEON-SPECIFIC CONFIGURATION
+========================================
+
+NEON_PROJECT_ID=
+Description: Neon project identifier
+Usage: For Neon management operations
+
+NEON_AUTH_BASE_URL=
+Description: Neon Authentication base URL
+Usage: For Neon auth endpoints
+
+VITE_NEON_AUTH_URL=
+Description: Neon Auth URL for Vite
+Usage: Frontend-facing Neon auth URL
+
+========================================
+APPLICATION CONSTANTS
+========================================
+
+ADVISORY_SYSTEM_NAME=Advisory System - Sistem Manajemen Advisory Terintegrasi
+ADVISORY_SYSTEM_DESCRIPTION=Platform terpusat untuk mengelola permohonan dan pemberian advisory dengan sistem pelacakan yang efisien dan transparan
+
+DEFAULT_PENJAWAB_EMAIL=admin@advisory.com
+DEFAULT_PENJAWAB_PASSWORD=admin123
+
+SESSION_COOKIE_NAME=session
+SESSION_COOKIE_MAX_AGE=604800 (7 days in seconds)
+
+========================================
+HOW TO USE THESE VARIABLES
+========================================
+
+1. Copy this file content to your .env.local file
+2. Fill in the values from your Neon dashboard
+3. For v0 projects, these are automatically configured through integrations
+4. For local development, set DATABASE_URL first, others will be derived from it
+
+========================================
+SECURITY NOTES
+========================================
+
+- Never commit .env files to version control
+- Keep DATABASE_URL and passwords secure
+- Rotate credentials periodically
+- Use strong passwords for database access
+- In production, use environment-specific configurations
+
+========================================
+TECHNICAL DETAILS
+========================================
+
+Database: PostgreSQL (via Neon)
+Connection Library: @neondatabase/serverless
+Framework: Next.js 16
+Authentication: Custom auth with bcrypt
+Session Management: HTTP-only cookies
+
+========================================
