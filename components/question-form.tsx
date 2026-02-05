@@ -7,13 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -25,8 +18,6 @@ import { submitQuestion, editQuestion } from "@/app/actions/questions";
 import { ADVISORY_TYPES } from "@/lib/types";
 import type { Question } from "@/lib/types";
 import { Loader2, Plus, Pencil } from "lucide-react";
-import { Plate, usePlateEditor } from "platejs/react";
-import { Editor, EditorContainer } from "./ui/editor";
 
 interface QuestionFormProps {
   mode: "create" | "edit";
@@ -95,15 +86,13 @@ export function QuestionForm({
     );
   }
 
-  const editor = usePlateEditor();
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {mode === "create" ? (
           <Button>
             <Plus className="h-4 w-4 mr-2" />
-            {triggerLabel ?? "Buat Pertanyaan Baru"}
+            {triggerLabel ?? "Tambah Pertanyaan Manual"}
           </Button>
         ) : (
           <Button variant="ghost" size="sm">
@@ -114,7 +103,7 @@ export function QuestionForm({
       <DialogContent className="w-[95vw] sm:w-[50vw] max-w-[50vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {mode === "create" ? "Buat Pertanyaan Baru" : "Edit Pertanyaan"}
+            {mode === "create" ? "Tambah Pertanyaan Manual" : "Edit Pertanyaan"}
           </DialogTitle>
           <DialogDescription>
             Lengkapi form di bawah untuk{" "}
@@ -132,9 +121,9 @@ export function QuestionForm({
           )}
 
           {/* Layout landscape: dua kolom */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-4">
             <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="divisi_instansi">
                     Divisi/Instansi Pemohon
@@ -158,24 +147,20 @@ export function QuestionForm({
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="unit_bisnis">
-                    Unit Bisnis/Proyek/Anak Usaha
-                  </Label>
-                  <Input
-                    id="unit_bisnis"
-                    name="unit_bisnis"
-                    defaultValue={question?.unit_bisnis}
-                    placeholder="Masukkan unit bisnis"
-                    required
-                  />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label>Hari/Tanggal Permohonan</Label>
-                  <Input value={today} disabled className="bg-muted" />
-                </div>
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="unit_bisnis">
+                  Unit Bisnis/Proyek/Anak Usaha
+                </Label>
+                <Input
+                  id="unit_bisnis"
+                  name="unit_bisnis"
+                  defaultValue={question?.unit_bisnis}
+                  placeholder="Masukkan unit bisnis"
+                  required
+                />
               </div>
+
               <div className="flex flex-col gap-2">
                 <Label htmlFor="data_informasi">
                   Data/Informasi yang Diberikan
@@ -204,7 +189,7 @@ export function QuestionForm({
               </div>
             </div>
             <div className="flex flex-col gap-3">
-              <Label>Jenis Pekerjaan (dapat memilih lebih dari 1)</Label>
+              <Label>Jenis Advisory (dapat memilih lebih dari 1)</Label>
               <div className="grid grid-cols-1 gap-2 p-4 border rounded-md max-h-[420px] overflow-y-auto">
                 {ADVISORY_TYPES.map((type) => (
                   <div key={type.id} className="flex items-start gap-2">

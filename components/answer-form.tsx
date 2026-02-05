@@ -13,7 +13,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { submitAnswer, generateRegistrationNumber } from "@/app/actions/questions";
+import {
+  submitAnswer,
+  generateRegistrationNumber,
+} from "@/app/actions/questions";
 import { ADVISORY_TYPES } from "@/lib/types";
 import type { QuestionWithAnswer } from "@/lib/types";
 import { Loader2, Send } from "lucide-react";
@@ -28,14 +31,17 @@ export function AnswerForm({ question, onSuccess }: AnswerFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedAdvisoryType, setSelectedAdvisoryType] = useState<string>(
-    question.jenis_advisory[0] || ""
+    question.jenis_advisory[0] || "",
   );
   const [registrationNumber, setRegistrationNumber] = useState<string>("");
 
   useEffect(() => {
     async function fetchRegNumber() {
       if (selectedAdvisoryType) {
-        const regNum = await generateRegistrationNumber(question.id, selectedAdvisoryType);
+        const regNum = await generateRegistrationNumber(
+          question.id,
+          selectedAdvisoryType,
+        );
         setRegistrationNumber(regNum);
       }
     }
@@ -82,32 +88,6 @@ export function AnswerForm({ question, onSuccess }: AnswerFormProps) {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-2">
-            <Label>Hari/Tanggal Jawaban</Label>
-            <Input value={today} disabled className="bg-muted" />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="advisory_type">Jenis Advisory untuk No. Registrasi</Label>
-            <Select
-              value={selectedAdvisoryType}
-              onValueChange={setSelectedAdvisoryType}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Pilih jenis advisory" />
-              </SelectTrigger>
-              <SelectContent>
-                {question.jenis_advisory.map((id) => (
-                  <SelectItem key={id} value={id}>
-                    {ADVISORY_TYPES.find((t) => t.id === id)?.label ?? id}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
         <div className="flex flex-col gap-2">
           <Label>No. Registrasi</Label>
           <Input
@@ -115,9 +95,6 @@ export function AnswerForm({ question, onSuccess }: AnswerFormProps) {
             disabled
             className="bg-muted font-mono"
           />
-          <p className="text-xs text-muted-foreground">
-            Format: nomor urut pertanyaan / nomor urut jenis advisory / dua digit tahun
-          </p>
         </div>
 
         <div className="flex flex-col gap-2">
