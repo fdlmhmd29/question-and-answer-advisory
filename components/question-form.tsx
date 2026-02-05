@@ -18,8 +18,9 @@ import { submitQuestion, editQuestion } from "@/app/actions/questions";
 import { ADVISORY_TYPES } from "@/lib/types";
 import type { Question } from "@/lib/types";
 import { Loader2, Plus, Pencil } from "lucide-react";
-import { Plate, usePlateEditor } from "platejs/react";
+import { Plate, usePlateEditor, useEditorRef } from "platejs/react";
 import { Editor, EditorContainer } from "./ui/editor";
+import { Editor as PlateEditor } from "platejs/core";
 
 interface QuestionFormProps {
   mode: "create" | "edit";
@@ -43,8 +44,7 @@ export function QuestionForm({
   const [selectedTypes, setSelectedTypes] = useState<string[]>(
     question?.jenis_advisory || [],
   );
-
-  // Initialize editor before using it
+  const [editorValue, setEditorValue] = useState<any>(null);
   const editor = usePlateEditor();
 
   const today = new Date().toLocaleDateString("id-ID", {
@@ -87,8 +87,7 @@ export function QuestionForm({
         return;
       }
 
-      // Get data from Plate editor
-      const editorValue = editor?.api?.getValue?.();
+      // Get data from Plate editor state
       let editorContent = "";
 
       if (editorValue && Array.isArray(editorValue)) {
@@ -108,7 +107,7 @@ export function QuestionForm({
         editorContent = JSON.stringify(editorValue);
       }
 
-      console.log("[v0] Editor value:", editorValue);
+      console.log("[v0] Editor value from state:", editorValue);
       console.log("[v0] Editor content extracted:", editorContent);
 
       if (!editorContent?.trim()) {
@@ -259,16 +258,10 @@ export function QuestionForm({
                 <Label htmlFor="data_informasi_editor">
                   Data/Informasi Yang Diberikan
                 </Label>
-                <Plate editor={editor}>
-                  <EditorContainer>
-                    <Editor
-                      id="data_informasi_editor"
-                      defaultValue={question?.data_informasi ? JSON.parse(question.data_informasi) : undefined}
-                      placeholder="Jelaskan data/informasi yang diberikan..."
-                      rows={5}
-                    />
-                  </EditorContainer>
-                </Plate>
+                <PlateEditorWrapper
+                  defaultValue={question?.data_informasi ? JSON.parse(question.data_informasi) : undefined}
+                  onValueChange={setEditorValue}
+                />
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="advisory_diinginkan">
@@ -339,5 +332,30 @@ export function QuestionForm({
         </form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+// Component to capture editor value from Plate context
+function PlateEditorWrapper({
+  defaultValue,
+  onValueChange,
+}: {
+  defaultValue?: any;
+  onValueChange: (value: any) => void;
+}) {
+  const editor = usePlateEditor({
+    value: defaultValue,
+    onChange: onValueChange,
+  });
+
+  return (
+    <Plate editor={editor}>
+      <EditorContainer>
+        <Editor
+          id="data_informasi_editor"
+          placeholder="Jelaskan data/informasi yang diberikan..."
+        />
+      </EditorContainer>
+    </Plate>
   );
 }
