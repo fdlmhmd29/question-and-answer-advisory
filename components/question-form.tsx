@@ -44,6 +44,9 @@ export function QuestionForm({
     question?.jenis_advisory || [],
   );
 
+  // Initialize editor before using it
+  const editor = usePlateEditor();
+
   const today = new Date().toLocaleDateString("id-ID", {
     weekday: "long",
     year: "numeric",
@@ -85,7 +88,7 @@ export function QuestionForm({
       }
 
       // Get data from Plate editor
-      const editorValue = editor?.api?.getSerializedValue();
+      const editorValue = editor?.api?.getValue?.();
       let editorContent = "";
 
       if (editorValue && Array.isArray(editorValue)) {
@@ -104,6 +107,9 @@ export function QuestionForm({
       } else if (editorValue && typeof editorValue === "object") {
         editorContent = JSON.stringify(editorValue);
       }
+
+      console.log("[v0] Editor value:", editorValue);
+      console.log("[v0] Editor content extracted:", editorContent);
 
       if (!editorContent?.trim()) {
         setError("Data/Informasi Yang Diberikan harus diisi");
@@ -162,8 +168,6 @@ export function QuestionForm({
         : [...prev, typeId],
     );
   }
-
-  const editor = usePlateEditor();
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
