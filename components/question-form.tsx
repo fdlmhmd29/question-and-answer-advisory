@@ -163,7 +163,7 @@ export function QuestionForm({
 
               <div className="flex flex-col gap-2">
                 <Label htmlFor="data_informasi">
-                  Data/Informasi Yang Diberikan
+                  Data/Informasi yang Diberikan
                 </Label>
                 <Textarea
                   id="data_informasi"
