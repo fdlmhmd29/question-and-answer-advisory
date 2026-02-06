@@ -28,10 +28,19 @@ export function RichTextEditor({
   }, [value])
 
   const applyFormat = (command: string) => {
-    // Ensure the editor is focused before executing the command
+    // Ensure the editor is focused and has selection
     editorRef.current?.focus()
     
-    // For list commands, we need to pass the command without any value
+    // Create a selection if none exists
+    const selection = window.getSelection()
+    if (!selection || selection.toString().length === 0) {
+      // If no selection, insert a new line or list item
+      if (command === 'insertUnorderedList' || command === 'insertOrderedList') {
+        document.execCommand('insertHTML', false, '<br>')
+      }
+    }
+    
+    // Execute the format command
     document.execCommand(command, false, undefined)
     
     // Update content after a brief delay to ensure DOM is updated

@@ -194,6 +194,49 @@
     @apply inline-block;
     animation: spin 1s linear infinite;
   }
+
+  /* Prose styling for HTML content display */
+  .prose {
+    @apply text-foreground;
+  }
+
+  .prose b,
+  .prose strong {
+    @apply font-bold text-foreground;
+  }
+
+  .prose em,
+  .prose i {
+    @apply italic text-foreground;
+  }
+
+  .prose ul {
+    @apply list-disc list-inside my-2 ml-2;
+  }
+
+  .prose ol {
+    @apply list-decimal list-inside my-2 ml-2;
+  }
+
+  .prose li {
+    @apply my-1;
+  }
+
+  .prose ul li {
+    @apply list-item;
+  }
+
+  .prose ol li {
+    @apply list-item;
+  }
+
+  .prose p {
+    @apply my-1;
+  }
+
+  .prose div {
+    @apply my-1;
+  }
 }
 
 @keyframes fadeIn {

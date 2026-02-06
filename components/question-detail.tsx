@@ -116,16 +116,16 @@ export function QuestionDetail({ question, userRole }: QuestionDetailProps) {
 
             <div className="flex flex-col gap-2">
               <h3 className="font-semibold">Data/Informasi Yang Diberikan</h3>
-              <div className="p-3 bg-muted/50 rounded-lg whitespace-pre-wrap text-sm max-h-40 overflow-y-auto">
-                {question.data_informasi}
-              </div>
+              <div className="p-3 bg-muted/50 rounded-lg prose prose-sm max-w-none text-sm max-h-40 overflow-y-auto"
+                dangerouslySetInnerHTML={{ __html: question.data_informasi }}
+              />
             </div>
 
             <div className="flex flex-col gap-2">
               <h3 className="font-semibold">Advisory Yang Diinginkan</h3>
-              <div className="p-3 bg-muted/50 rounded-lg whitespace-pre-wrap text-sm max-h-40 overflow-y-auto">
-                {question.advisory_diinginkan}
-              </div>
+              <div className="p-3 bg-muted/50 rounded-lg prose prose-sm max-w-none text-sm max-h-40 overflow-y-auto"
+                dangerouslySetInnerHTML={{ __html: question.advisory_diinginkan }}
+              />
             </div>
           </div>
 
@@ -165,9 +165,9 @@ export function QuestionDetail({ question, userRole }: QuestionDetailProps) {
                   <p className="text-xs text-muted-foreground mb-2">
                     <em>Technical Advisory Note:</em>
                   </p>
-                  <div className="p-3 bg-background rounded border whitespace-pre-wrap text-sm max-h-48 overflow-y-auto">
-                    {question.answer.technical_advisory_note}
-                  </div>
+                  <div className="p-3 bg-background rounded border prose prose-sm max-w-none text-sm max-h-48 overflow-y-auto"
+                    dangerouslySetInnerHTML={{ __html: question.answer.technical_advisory_note }}
+                  />
                 </div>
               </div>
             </div>
