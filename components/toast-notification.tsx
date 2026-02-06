@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState, createContext, useContext, useCallback } from 'react'
 import { Check, X, AlertCircle, Info } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -85,8 +85,6 @@ export function ToastNotification({
 }
 
 // Toast context and hook
-import React, { createContext, useContext, useCallback, useState } from 'react'
-
 type Toast = ToastNotificationProps & { id: string }
 
 interface ToastContextType {
