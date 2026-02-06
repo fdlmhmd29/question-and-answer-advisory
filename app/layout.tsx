@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 
 import { Analytics } from '@vercel/analytics/next'
 import { ToastProvider } from '@/components/toast-notification'
+import { ErrorBoundary } from '@/components/error-boundary'
 import './globals.css'
 
 import { Geist_Mono, Inter as V0_Font_Inter, Geist_Mono as V0_Font_Geist_Mono, Source_Serif_4 as V0_Font_Source_Serif_4 } from 'next/font/google'
@@ -50,9 +51,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased min-h-screen w-full`}>
-        <ToastProvider>
-          {children}
-        </ToastProvider>
+        <ErrorBoundary>
+          <ToastProvider>
+            {children}
+          </ToastProvider>
+        </ErrorBoundary>
         <Analytics />
       </body>
     </html>
