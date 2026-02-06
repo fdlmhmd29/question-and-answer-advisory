@@ -61,12 +61,7 @@
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.2",
-    "zod": "3.25.76",
-    "tiptap": "^2.1.13",
-    "@tiptap/core": "^2.1.13",
-    "@tiptap/react": "^2.1.13",
-    "@tiptap/starter-kit": "^2.1.13",
-    "@tiptap/pm": "^2.1.13"
+    "zod": "3.25.76"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.9",
