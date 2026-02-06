@@ -14,6 +14,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { editAnswer } from '@/app/actions/questions'
+import { useToast } from '@/components/toast-notification'
 import type { Answer } from '@/lib/types'
 import { Loader2, Pencil } from 'lucide-react'
 
@@ -24,6 +25,7 @@ interface AnswerEditFormProps {
 
 export function AnswerEditForm({ answer, onSuccess }: AnswerEditFormProps) {
   const router = useRouter()
+  const toast = useToast()
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -40,13 +42,29 @@ export function AnswerEditForm({ answer, onSuccess }: AnswerEditFormProps) {
 
       if (result?.error) {
         setError(result.error)
+        toast({
+          type: 'error',
+          title: 'Gagal Mengupdate Jawaban',
+          message: result.error,
+        })
       } else {
+        toast({
+          type: 'success',
+          title: 'Jawaban Berhasil Diperbarui',
+          message: 'Perubahan jawaban telah disimpan.',
+        })
         setOpen(false)
         router.refresh()
         onSuccess?.()
       }
-    } catch {
-      setError('Terjadi kesalahan')
+    } catch (error) {
+      const errorMessage = 'Terjadi kesalahan saat menyimpan'
+      setError(errorMessage)
+      toast({
+        type: 'error',
+        title: 'Error',
+        message: errorMessage,
+      })
     } finally {
       setIsLoading(false)
     }

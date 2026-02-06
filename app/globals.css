@@ -210,16 +210,22 @@
     @apply italic text-foreground;
   }
 
+  /* Lists */
+  .prose ul,
+  .prose ol {
+    @apply my-2 ml-4;
+  }
+
   .prose ul {
-    @apply list-disc list-inside my-2 ml-2;
+    @apply list-disc;
   }
 
   .prose ol {
-    @apply list-decimal list-inside my-2 ml-2;
+    @apply list-decimal;
   }
 
   .prose li {
-    @apply my-1;
+    @apply my-1 ml-2;
   }
 
   .prose ul li {
@@ -230,12 +236,26 @@
     @apply list-item;
   }
 
+  /* Nested lists */
+  .prose ul ul,
+  .prose ol ol,
+  .prose ul ol,
+  .prose ol ul {
+    @apply my-2 ml-6;
+  }
+
+  /* Paragraph and text */
   .prose p {
-    @apply my-1;
+    @apply my-2;
   }
 
   .prose div {
     @apply my-1;
+  }
+
+  /* Ensure links and other elements are readable */
+  .prose a {
+    @apply text-primary underline;
   }
 }
 

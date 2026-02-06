@@ -28,25 +28,37 @@ export function RichTextEditor({
   }, [value])
 
   const applyFormat = (command: string) => {
-    // Ensure the editor is focused and has selection
+    // Ensure the editor is focused
     editorRef.current?.focus()
     
-    // Create a selection if none exists
     const selection = window.getSelection()
-    if (!selection || selection.toString().length === 0) {
-      // If no selection, insert a new line or list item
-      if (command === 'insertUnorderedList' || command === 'insertOrderedList') {
-        document.execCommand('insertHTML', false, '<br>')
+    
+    // For list commands, ensure we have proper context
+    if (command === 'insertUnorderedList' || command === 'insertOrderedList') {
+      // If no selection, select the current line or create a new one
+      if (!selection || selection.toString().length === 0) {
+        // Insert text first if editor is empty or has no content selected
+        if (editorRef.current?.innerText.trim() === '' || !selection?.rangeCount) {
+          document.execCommand('insertText', false, 'Itemize this')
+        }
+        // Select all text in line
+        document.execCommand('selectAll', false)
       }
     }
     
     // Execute the format command
-    document.execCommand(command, false, undefined)
+    const result = document.execCommand(command, false, undefined)
     
-    // Update content after a brief delay to ensure DOM is updated
+    // Restore cursor position and update
+    if (selection?.rangeCount) {
+      const range = selection.getRangeAt(0)
+      editorRef.current?.focus()
+    }
+    
+    // Update content after formatting
     setTimeout(() => {
       updateContent()
-    }, 0)
+    }, 10)
   }
 
   const updateContent = () => {

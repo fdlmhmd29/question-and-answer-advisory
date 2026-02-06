@@ -12,6 +12,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { AnswerForm } from "./answer-form";
+import { AnswerEditForm } from "./answer-edit-form";
+import { HtmlContent } from "./html-content";
 import { ADVISORY_TYPES } from "@/lib/types";
 import type { QuestionWithAnswer } from "@/lib/types";
 import { Eye, Calendar, Building, User, FileText } from "lucide-react";
@@ -116,26 +118,31 @@ export function QuestionDetail({ question, userRole }: QuestionDetailProps) {
 
             <div className="flex flex-col gap-2">
               <h3 className="font-semibold">Data/Informasi Yang Diberikan</h3>
-              <div className="p-3 bg-muted/50 rounded-lg prose prose-sm max-w-none text-sm max-h-40 overflow-y-auto"
-                dangerouslySetInnerHTML={{ __html: question.data_informasi }}
-              />
+              <div className="p-3 bg-muted/50 rounded-lg text-sm max-h-40 overflow-y-auto">
+                <HtmlContent content={question.data_informasi} />
+              </div>
             </div>
 
             <div className="flex flex-col gap-2">
               <h3 className="font-semibold">Advisory Yang Diinginkan</h3>
-              <div className="p-3 bg-muted/50 rounded-lg prose prose-sm max-w-none text-sm max-h-40 overflow-y-auto"
-                dangerouslySetInnerHTML={{ __html: question.advisory_diinginkan }}
-              />
+              <div className="p-3 bg-muted/50 rounded-lg text-sm max-h-40 overflow-y-auto">
+                <HtmlContent content={question.advisory_diinginkan} />
+              </div>
             </div>
           </div>
 
           {/* Kolom kanan: Jawaban (landscape) */}
           {question.answer ? (
             <div className="flex flex-col gap-4 border-none md:pl-6 min-w-0">
-              <h3 className="font-semibold text-green-700 flex items-center gap-2">
-                <Building className="h-4 w-4" />
-                Jawaban Advisory
-              </h3>
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-green-700 flex items-center gap-2">
+                  <Building className="h-4 w-4" />
+                  Jawaban Advisory
+                </h3>
+                {userRole === "penjawab" && (
+                  <AnswerEditForm answer={question.answer} onSuccess={() => setOpen(false)} />
+                )}
+              </div>
               <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex flex-col gap-4 min-w-0">
                 <div className="flex flex-col gap-3 text-sm">
                   <div className="min-w-0">
@@ -165,9 +172,9 @@ export function QuestionDetail({ question, userRole }: QuestionDetailProps) {
                   <p className="text-xs text-muted-foreground mb-2">
                     <em>Technical Advisory Note:</em>
                   </p>
-                  <div className="p-3 bg-background rounded border prose prose-sm max-w-none text-sm max-h-48 overflow-y-auto"
-                    dangerouslySetInnerHTML={{ __html: question.answer.technical_advisory_note }}
-                  />
+                  <div className="p-3 bg-background rounded border text-sm max-h-48 overflow-y-auto">
+                    <HtmlContent content={question.answer.technical_advisory_note} />
+                  </div>
                 </div>
               </div>
             </div>
