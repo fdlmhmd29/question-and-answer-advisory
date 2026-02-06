@@ -64,7 +64,7 @@ export function QuestionsTable({
 }: QuestionsTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   // Semua filter disimpan di local state - tidak auto-refresh
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [status, setStatus] = useState(searchParams.get("status") || "all");
@@ -75,14 +75,14 @@ export function QuestionsTable({
   // Hanya update URL saat klik tombol Cari
   function handleSearch() {
     const params = new URLSearchParams();
-    
+
     if (search) params.set("search", search);
     if (status && status !== "all") params.set("status", status);
     if (sortBy && sortBy !== "newest") params.set("sortBy", sortBy);
     if (dateFrom) params.set("dateFrom", dateFrom);
     if (dateTo) params.set("dateTo", dateTo);
     params.set("page", "1");
-    
+
     router.push(`?${params.toString()}`);
   }
 
@@ -138,7 +138,7 @@ export function QuestionsTable({
           <Filter className="h-4 w-4" />
           Filter & Pencarian
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="flex flex-col gap-2">
             <Label htmlFor="search" className="text-xs">
@@ -242,7 +242,9 @@ export function QuestionsTable({
               <TableHead className="w-[100px]">Tanggal</TableHead>
               <TableHead>Pemohon</TableHead>
               <TableHead className="hidden md:table-cell">Divisi</TableHead>
-              <TableHead className="hidden lg:table-cell">Jenis Advisory</TableHead>
+              <TableHead className="hidden lg:table-cell">
+                Jenis Advisory
+              </TableHead>
               <TableHead className="w-[100px]">Status</TableHead>
               <TableHead className="w-[100px] text-right">Aksi</TableHead>
             </TableRow>
@@ -250,7 +252,10 @@ export function QuestionsTable({
           <TableBody>
             {questions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell
+                  colSpan={6}
+                  className="text-center py-8 text-muted-foreground"
+                >
                   Tidak ada pertanyaan ditemukan
                 </TableCell>
               </TableRow>
@@ -263,7 +268,9 @@ export function QuestionsTable({
                   <TableCell>
                     <div>
                       <p className="font-medium">{q.nama_pemohon}</p>
-                      <p className="text-xs text-muted-foreground">{q.unit_bisnis}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {q.unit_bisnis}
+                      </p>
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-sm">
@@ -298,41 +305,49 @@ export function QuestionsTable({
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
                       <QuestionDetail question={q} userRole={userRole} />
-                      
+
                       {/* Penanya: Edit & Delete hanya untuk pertanyaan yang belum dijawab */}
-                      {userRole === "penanya" && q.status === "belum_dijawab" && (
-                        <>
-                          <QuestionForm
-                            mode="edit"
-                            question={q}
-                            onSuccess={() => router.refresh()}
-                          />
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="sm" className="text-destructive">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Hapus Pertanyaan?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Tindakan ini tidak dapat dibatalkan. Pertanyaan akan dihapus secara permanen.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Batal</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDelete(q.id)}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      {userRole === "penanya" &&
+                        q.status === "belum_dijawab" && (
+                          <>
+                            <QuestionForm
+                              mode="edit"
+                              question={q}
+                              onSuccess={() => router.refresh()}
+                            />
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-destructive"
                                 >
-                                  Hapus
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </>
-                      )}
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>
+                                    Hapus Pertanyaan?
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Tindakan ini tidak dapat dibatalkan.
+                                    Pertanyaan akan dihapus secara permanen.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Batal</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDelete(q.id)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Hapus
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </>
+                        )}
 
                       {/* Penjawab: Export untuk pertanyaan yang sudah dijawab */}
                       {userRole === "penjawab" && q.status === "dijawab" && (

@@ -67,7 +67,9 @@ export default async function PenjawabDashboard({ searchParams }: PageProps) {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Total Pertanyaan</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Pertanyaan
+                </CardTitle>
                 <FileQuestion className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -76,20 +78,28 @@ export default async function PenjawabDashboard({ searchParams }: PageProps) {
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Belum Dijawab</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Belum Dijawab
+                </CardTitle>
                 <Clock className="h-4 w-4 text-amber-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-amber-600">{counts.belum_dijawab}</div>
+                <div className="text-2xl font-bold text-amber-600">
+                  {counts.belum_dijawab}
+                </div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Sudah Dijawab</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Sudah Dijawab
+                </CardTitle>
                 <CheckCircle className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">{counts.sudah_dijawab}</div>
+                <div className="text-2xl font-bold text-green-600">
+                  {counts.sudah_dijawab}
+                </div>
               </CardContent>
             </Card>
           </div>
