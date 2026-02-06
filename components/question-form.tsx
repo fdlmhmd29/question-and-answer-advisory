@@ -18,6 +18,7 @@ import { submitQuestion, editQuestion } from "@/app/actions/questions";
 import { ADVISORY_TYPES } from "@/lib/types";
 import type { Question } from "@/lib/types";
 import { Loader2, Plus, Pencil } from "lucide-react";
+import { useToast } from "@/components/toast-notification";
 
 interface QuestionFormProps {
   mode: "create" | "edit";
@@ -35,6 +36,7 @@ export function QuestionForm({
   userName,
   triggerLabel,
 }: QuestionFormProps) {
+  const toast = useToast();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -72,15 +74,31 @@ export function QuestionForm({
 
       if (result?.error) {
         setError(result.error);
+        toast({
+          type: 'error',
+          title: mode === 'create' ? 'Gagal Mengirim Pertanyaan' : 'Gagal Mengupdate Pertanyaan',
+          message: result.error,
+        });
       } else {
+        toast({
+          type: 'success',
+          title: mode === 'create' ? 'Pertanyaan Berhasil Dikirim' : 'Pertanyaan Berhasil Diupdate',
+          message: mode === 'create' ? 'Pertanyaan Anda telah diterima dan akan segera dijawab.' : 'Perubahan telah disimpan.',
+        });
         setOpen(false);
         setSelectedTypes([]);
         setDataInformasi('');
         setAdvisoryDiinginkan('');
         onSuccess?.();
       }
-    } catch {
-      setError("Terjadi kesalahan");
+    } catch (error) {
+      const errorMessage = 'Terjadi kesalahan saat memproses permintaan';
+      setError(errorMessage);
+      toast({
+        type: 'error',
+        title: 'Error',
+        message: errorMessage,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -108,7 +126,7 @@ export function QuestionForm({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="w-[95vw] sm:w-[50vw] max-w-[50vw] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>
             {mode === "create" ? "Tambah Pertanyaan Manual" : "Edit Pertanyaan"}
@@ -128,8 +146,8 @@ export function QuestionForm({
             </div>
           )}
 
-          {/* Layout landscape: dua kolom */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-4">
+          {/* Layout mobile-first: satu kolom di mobile, dua kolom di desktop */}
+          <div className="grid gap-4 md:gap-6 md:grid-cols-2">
             <div className="flex flex-col gap-4">
               <div className="grid grid-cols-1 gap-4">
                 <div className="flex flex-col gap-2">

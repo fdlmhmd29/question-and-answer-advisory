@@ -28,9 +28,16 @@ export function RichTextEditor({
   }, [value])
 
   const applyFormat = (command: string) => {
-    document.execCommand(command, false)
+    // Ensure the editor is focused before executing the command
     editorRef.current?.focus()
-    updateContent()
+    
+    // For list commands, we need to pass the command without any value
+    document.execCommand(command, false, undefined)
+    
+    // Update content after a brief delay to ensure DOM is updated
+    setTimeout(() => {
+      updateContent()
+    }, 0)
   }
 
   const updateContent = () => {

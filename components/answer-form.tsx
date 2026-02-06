@@ -20,6 +20,7 @@ import {
 import { ADVISORY_TYPES } from "@/lib/types";
 import type { QuestionWithAnswer } from "@/lib/types";
 import { Loader2, Send } from "lucide-react";
+import { useToast } from "@/components/toast-notification";
 
 interface AnswerFormProps {
   question: QuestionWithAnswer;
@@ -28,6 +29,7 @@ interface AnswerFormProps {
 
 export function AnswerForm({ question, onSuccess }: AnswerFormProps) {
   const router = useRouter();
+  const toast = useToast();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedAdvisoryType, setSelectedAdvisoryType] = useState<string>(
@@ -61,13 +63,29 @@ export function AnswerForm({ question, onSuccess }: AnswerFormProps) {
 
       if (result?.error) {
         setError(result.error);
+        toast({
+          type: 'error',
+          title: 'Gagal Mengirim Jawaban',
+          message: result.error,
+        });
       } else {
+        toast({
+          type: 'success',
+          title: 'Jawaban Berhasil Dikirim',
+          message: 'Jawaban Anda telah disimpan dan dikirim ke sistem.',
+        });
         router.refresh();
         setTechnicalNote('');
         onSuccess?.();
       }
-    } catch {
-      setError("Terjadi kesalahan");
+    } catch (error) {
+      const errorMessage = 'Terjadi kesalahan saat mengirim jawaban';
+      setError(errorMessage);
+      toast({
+        type: 'error',
+        title: 'Error',
+        message: errorMessage,
+      });
     } finally {
       setIsLoading(false);
     }
