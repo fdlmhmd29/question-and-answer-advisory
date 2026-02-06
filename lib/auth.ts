@@ -188,3 +188,51 @@ export async function loginUser(
     return { success: false, error: "Terjadi kesalahan saat login" };
   }
 }
+
+// Update user profile
+export async function updateUserProfile(
+  userId: number,
+  data: {
+    name?: string;
+    email?: string;
+    password?: string;
+  }
+): Promise<{ success: boolean; error?: string; user?: User }> {
+  try {
+    // If email is being changed, check if it's already in use
+    if (data.email) {
+      const existing = await sql`
+        SELECT id FROM users WHERE email = ${data.email} AND id != ${userId}
+      `;
+      if (existing.length > 0) {
+        return { success: false, error: "Email sudah digunakan" };
+      }
+    }
+
+    // Build the update dynamically
+    let passwordHash: string | undefined;
+    if (data.password) {
+      passwordHash = await hashPassword(data.password);
+    }
+
+    const result = await sql`
+      UPDATE users SET
+        name = COALESCE(${data.name}, name),
+        email = COALESCE(${data.email}, email),
+        password_hash = COALESCE(${passwordHash}, password_hash),
+        updated_at = NOW()
+      WHERE id = ${userId}
+      RETURNING id, email, name, role, created_at
+    `;
+
+    if (result.length === 0) {
+      return { success: false, error: "User tidak ditemukan" };
+    }
+
+    const user = result[0] as User;
+    return { success: true, user };
+  } catch (error) {
+    console.error("Update user error:", error);
+    return { success: false, error: "Gagal mengupdate profil" };
+  }
+}

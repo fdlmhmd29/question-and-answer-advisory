@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/rich-text-editor";
 import {
   Select,
   SelectContent,
@@ -34,6 +34,7 @@ export function AnswerForm({ question, onSuccess }: AnswerFormProps) {
     question.jenis_advisory[0] || "",
   );
   const [registrationNumber, setRegistrationNumber] = useState<string>("");
+  const [technicalNote, setTechnicalNote] = useState<string>("");
 
   useEffect(() => {
     async function fetchRegNumber() {
@@ -53,6 +54,7 @@ export function AnswerForm({ question, onSuccess }: AnswerFormProps) {
     setError(null);
 
     formData.set("no_registrasi", registrationNumber);
+    formData.set("technical_advisory_note", technicalNote);
 
     try {
       const result = await submitAnswer(question.id, formData);
@@ -61,6 +63,7 @@ export function AnswerForm({ question, onSuccess }: AnswerFormProps) {
         setError(result.error);
       } else {
         router.refresh();
+        setTechnicalNote('');
         onSuccess?.();
       }
     } catch {
@@ -101,13 +104,11 @@ export function AnswerForm({ question, onSuccess }: AnswerFormProps) {
           <Label htmlFor="technical_advisory_note" className="italic">
             Technical Advisory Note:
           </Label>
-          <Textarea
-            id="technical_advisory_note"
-            name="technical_advisory_note"
+          <RichTextEditor
+            value={technicalNote}
+            onChange={setTechnicalNote}
             placeholder="Tulis technical advisory note di sini..."
-            rows={6}
-            required
-            className="border-2"
+            editorClassName="[&_.ProseMirror]:min-h-[200px]"
           />
         </div>
 

@@ -376,10 +376,11 @@ export async function answerQuestion(
 }
 
 /**
- * Format: nomor_urut_pertanyaan / nomor_urut_jenis_advisory / dua_digit_tahun
- * - nomor_urut_pertanyaan: urutan global pertanyaan (keberapa pertanyaan dikirim ke sistem)
- * - nomor_urut_jenis_advisory: urutan jawaban untuk jenis advisory ini di tahun ini
- * - dua_digit_tahun: dua digit terakhir tahun
+ * Format: sequential_number / advisory_number / year
+ * Example: 001/AdvisoryNumber/23
+ * - sequential_number: global question number (padded to 3 digits)
+ * - advisory_number: the advisory type ID/number
+ * - year: two-digit year
  */
 export async function getNextRegistrationNumber(
   questionId: string,
@@ -393,29 +394,25 @@ export async function getNextRegistrationNumber(
       SELECT id, created_at FROM questions WHERE id = ${questionId}
     `;
     if (questionRow.length === 0) {
-      return `1/1/${yearShort}`;
+      return `001/${jenisAdvisory}/${String(yearShort).padStart(2, '0')}`;
     }
 
     const createdAt = questionRow[0].created_at;
 
-    const [ordinalQuestionRow, ordinalJenisRow] = await Promise.all([
-      sql`SELECT COUNT(*) as count FROM questions WHERE created_at <= ${createdAt}`,
-      sql`
-        SELECT COUNT(*) as count FROM answers a
-        INNER JOIN questions q ON q.id = a.question_id
-        WHERE ${jenisAdvisory} = ANY(q.jenis_advisory)
-        AND EXTRACT(YEAR FROM a.tanggal_jawaban) = ${year}
-      `,
-    ]);
+    // Get the sequential global question number (padded to 3 digits)
+    const ordinalQuestionRow = await sql`
+      SELECT COUNT(*) as count FROM questions WHERE created_at <= ${createdAt}
+    `;
 
     const nomorUrutPertanyaan = parseInt(ordinalQuestionRow[0].count);
-    const nomorUrutJenis = parseInt(ordinalJenisRow[0].count) + 1;
+    const paddedNumber = String(nomorUrutPertanyaan).padStart(3, '0');
+    const paddedYear = String(yearShort).padStart(2, '0');
 
-    return `${nomorUrutPertanyaan}/${nomorUrutJenis}/${yearShort}`;
+    return `${paddedNumber}/${jenisAdvisory}/${paddedYear}`;
   } catch (error) {
     console.error("getNextRegistrationNumber error:", error);
     const yearShort = new Date().getFullYear() % 100;
-    return `1/1/${yearShort}`;
+    return `001/${jenisAdvisory}/${String(yearShort).padStart(2, '0')}`;
   }
 }
 

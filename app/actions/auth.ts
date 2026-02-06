@@ -58,3 +58,69 @@ export async function logout() {
   await deleteSession();
   redirect("/login");
 }
+
+export async function updateProfile(formData: FormData) {
+  const session = await getSession();
+
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
+  const name = formData.get("name") as string;
+  const email = formData.get("email") as string;
+  const currentPassword = formData.get("currentPassword") as string;
+  const newPassword = formData.get("newPassword") as string;
+  const confirmPassword = formData.get("confirmPassword") as string;
+
+  // Validation
+  if (!name || !email) {
+    return { error: "Nama dan email harus diisi" };
+  }
+
+  let passwordData: { password?: string } = {};
+
+  // Only update password if user wants to change it
+  if (newPassword) {
+    if (!currentPassword) {
+      return { error: "Password saat ini harus diisi untuk mengubah password" };
+    }
+
+    if (newPassword !== confirmPassword) {
+      return { error: "Password baru dan konfirmasi tidak sesuai" };
+    }
+
+    if (newPassword.length < 6) {
+      return { error: "Password baru minimal 6 karakter" };
+    }
+
+    // Verify current password
+    const { verifyPassword } = await import("@/lib/auth");
+    const { sql } = await import("@/lib/db");
+
+    const userRecord = await sql`
+      SELECT password_hash FROM users WHERE id = ${session.user.id}
+    `;
+
+    const isValid = await verifyPassword(currentPassword, userRecord[0].password_hash);
+    if (!isValid) {
+      return { error: "Password saat ini tidak sesuai" };
+    }
+
+    passwordData.password = newPassword;
+  }
+
+  const { updateUserProfile: updateUser } = await import("@/lib/auth");
+  const result = await updateUser(session.user.id, {
+    name,
+    email,
+    ...passwordData,
+  });
+
+  if (!result.success) {
+    return { error: result.error };
+  }
+
+  const { revalidatePath } = await import("next/cache");
+  revalidatePath("/dashboard/profile");
+  return { success: true };
+}

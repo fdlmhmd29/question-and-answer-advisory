@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RichTextEditor } from "@/components/rich-text-editor";
 import {
   Dialog,
   DialogContent,
@@ -41,6 +41,8 @@ export function QuestionForm({
   const [selectedTypes, setSelectedTypes] = useState<string[]>(
     question?.jenis_advisory || [],
   );
+  const [dataInformasi, setDataInformasi] = useState(question?.data_informasi || '');
+  const [advisoryDiinginkan, setAdvisoryDiinginkan] = useState(question?.advisory_diinginkan || '');
 
   const today = new Date().toLocaleDateString("id-ID", {
     weekday: "long",
@@ -52,6 +54,10 @@ export function QuestionForm({
   async function handleSubmit(formData: FormData) {
     setIsLoading(true);
     setError(null);
+
+    // Add RTE content
+    formData.set("data_informasi", dataInformasi);
+    formData.set("advisory_diinginkan", advisoryDiinginkan);
 
     // Add selected advisory types
     selectedTypes.forEach((type) => {
@@ -69,6 +75,8 @@ export function QuestionForm({
       } else {
         setOpen(false);
         setSelectedTypes([]);
+        setDataInformasi('');
+        setAdvisoryDiinginkan('');
         onSuccess?.();
       }
     } catch {
@@ -165,26 +173,22 @@ export function QuestionForm({
                 <Label htmlFor="data_informasi">
                   Data/Informasi yang Diberikan
                 </Label>
-                <Textarea
-                  id="data_informasi"
-                  name="data_informasi"
-                  defaultValue={question?.data_informasi}
+                <RichTextEditor
+                  value={dataInformasi}
+                  onChange={setDataInformasi}
                   placeholder="Jelaskan data/informasi yang diberikan..."
-                  rows={5}
-                  required
+                  editorClassName="[&_.ProseMirror]:min-h-[150px]"
                 />
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="advisory_diinginkan">
                   Advisory Yang Diinginkan
                 </Label>
-                <Textarea
-                  id="advisory_diinginkan"
-                  name="advisory_diinginkan"
-                  defaultValue={question?.advisory_diinginkan}
+                <RichTextEditor
+                  value={advisoryDiinginkan}
+                  onChange={setAdvisoryDiinginkan}
                   placeholder="Jelaskan advisory yang diinginkan..."
-                  rows={5}
-                  required
+                  editorClassName="[&_.ProseMirror]:min-h-[150px]"
                 />
               </div>
             </div>
