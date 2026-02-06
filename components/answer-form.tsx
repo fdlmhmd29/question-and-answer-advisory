@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/rich-text-editor";
 import {
   Select,
   SelectContent,
@@ -20,6 +20,7 @@ import {
 import { ADVISORY_TYPES } from "@/lib/types";
 import type { QuestionWithAnswer } from "@/lib/types";
 import { Loader2, Send } from "lucide-react";
+import { useToast } from "@/components/toast-notification";
 
 interface AnswerFormProps {
   question: QuestionWithAnswer;
@@ -28,12 +29,14 @@ interface AnswerFormProps {
 
 export function AnswerForm({ question, onSuccess }: AnswerFormProps) {
   const router = useRouter();
+  const toast = useToast();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedAdvisoryType, setSelectedAdvisoryType] = useState<string>(
     question.jenis_advisory[0] || "",
   );
   const [registrationNumber, setRegistrationNumber] = useState<string>("");
+  const [technicalNote, setTechnicalNote] = useState<string>("");
 
   useEffect(() => {
     async function fetchRegNumber() {
@@ -53,18 +56,36 @@ export function AnswerForm({ question, onSuccess }: AnswerFormProps) {
     setError(null);
 
     formData.set("no_registrasi", registrationNumber);
+    formData.set("technical_advisory_note", technicalNote);
 
     try {
       const result = await submitAnswer(question.id, formData);
 
       if (result?.error) {
         setError(result.error);
+        toast({
+          type: 'error',
+          title: 'Gagal Mengirim Jawaban',
+          message: result.error,
+        });
       } else {
+        toast({
+          type: 'success',
+          title: 'Jawaban Berhasil Dikirim',
+          message: 'Jawaban Anda telah disimpan dan dikirim ke sistem.',
+        });
         router.refresh();
+        setTechnicalNote('');
         onSuccess?.();
       }
-    } catch {
-      setError("Terjadi kesalahan");
+    } catch (error) {
+      const errorMessage = 'Terjadi kesalahan saat mengirim jawaban';
+      setError(errorMessage);
+      toast({
+        type: 'error',
+        title: 'Error',
+        message: errorMessage,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -101,13 +122,11 @@ export function AnswerForm({ question, onSuccess }: AnswerFormProps) {
           <Label htmlFor="technical_advisory_note" className="italic">
             Technical Advisory Note:
           </Label>
-          <Textarea
-            id="technical_advisory_note"
-            name="technical_advisory_note"
+          <RichTextEditor
+            value={technicalNote}
+            onChange={setTechnicalNote}
             placeholder="Tulis technical advisory note di sini..."
-            rows={6}
-            required
-            className="border-2"
+            editorClassName="[&_.ProseMirror]:min-h-[200px]"
           />
         </div>
 

@@ -142,3 +142,29 @@ export async function submitAnswer(questionId: string, formData: FormData) {
 export async function generateRegistrationNumber(questionId: string, jenisAdvisory: string) {
   return await getNextRegistrationNumber(questionId, jenisAdvisory);
 }
+
+export async function editAnswer(answerId: string, formData: FormData) {
+  const session = await getSession();
+
+  if (!session || session.user.role !== "penjawab") {
+    return { error: "Unauthorized" };
+  }
+
+  const technical_advisory_note = formData.get("technical_advisory_note") as string;
+
+  if (!technical_advisory_note) {
+    return { error: "Catatan teknis tidak boleh kosong" };
+  }
+
+  const { updateAnswer } = await import("@/lib/questions");
+  const result = await updateAnswer(answerId, session.user.id, {
+    technical_advisory_note,
+  });
+
+  if (!result.success) {
+    return { error: result.error };
+  }
+
+  revalidatePath("/dashboard/penjawab", "max");
+  return { success: true };
+}

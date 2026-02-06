@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RichTextEditor } from "@/components/rich-text-editor";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +18,7 @@ import { submitQuestion, editQuestion } from "@/app/actions/questions";
 import { ADVISORY_TYPES } from "@/lib/types";
 import type { Question } from "@/lib/types";
 import { Loader2, Plus, Pencil } from "lucide-react";
+import { useToast } from "@/components/toast-notification";
 
 interface QuestionFormProps {
   mode: "create" | "edit";
@@ -35,12 +36,15 @@ export function QuestionForm({
   userName,
   triggerLabel,
 }: QuestionFormProps) {
+  const toast = useToast();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTypes, setSelectedTypes] = useState<string[]>(
     question?.jenis_advisory || [],
   );
+  const [dataInformasi, setDataInformasi] = useState(question?.data_informasi || '');
+  const [advisoryDiinginkan, setAdvisoryDiinginkan] = useState(question?.advisory_diinginkan || '');
 
   const today = new Date().toLocaleDateString("id-ID", {
     weekday: "long",
@@ -52,6 +56,10 @@ export function QuestionForm({
   async function handleSubmit(formData: FormData) {
     setIsLoading(true);
     setError(null);
+
+    // Add RTE content
+    formData.set("data_informasi", dataInformasi);
+    formData.set("advisory_diinginkan", advisoryDiinginkan);
 
     // Add selected advisory types
     selectedTypes.forEach((type) => {
@@ -66,13 +74,31 @@ export function QuestionForm({
 
       if (result?.error) {
         setError(result.error);
+        toast({
+          type: 'error',
+          title: mode === 'create' ? 'Gagal Mengirim Pertanyaan' : 'Gagal Mengupdate Pertanyaan',
+          message: result.error,
+        });
       } else {
+        toast({
+          type: 'success',
+          title: mode === 'create' ? 'Pertanyaan Berhasil Dikirim' : 'Pertanyaan Berhasil Diupdate',
+          message: mode === 'create' ? 'Pertanyaan Anda telah diterima dan akan segera dijawab.' : 'Perubahan telah disimpan.',
+        });
         setOpen(false);
         setSelectedTypes([]);
+        setDataInformasi('');
+        setAdvisoryDiinginkan('');
         onSuccess?.();
       }
-    } catch {
-      setError("Terjadi kesalahan");
+    } catch (error) {
+      const errorMessage = 'Terjadi kesalahan saat memproses permintaan';
+      setError(errorMessage);
+      toast({
+        type: 'error',
+        title: 'Error',
+        message: errorMessage,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -100,7 +126,7 @@ export function QuestionForm({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="w-[95vw] sm:w-[50vw] max-w-[50vw] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>
             {mode === "create" ? "Tambah Pertanyaan Manual" : "Edit Pertanyaan"}
@@ -120,8 +146,8 @@ export function QuestionForm({
             </div>
           )}
 
-          {/* Layout landscape: dua kolom */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-4">
+          {/* Layout mobile-first: satu kolom di mobile, dua kolom di desktop */}
+          <div className="grid gap-4 md:gap-6 md:grid-cols-2">
             <div className="flex flex-col gap-4">
               <div className="grid grid-cols-1 gap-4">
                 <div className="flex flex-col gap-2">
@@ -165,26 +191,22 @@ export function QuestionForm({
                 <Label htmlFor="data_informasi">
                   Data/Informasi yang Diberikan
                 </Label>
-                <Textarea
-                  id="data_informasi"
-                  name="data_informasi"
-                  defaultValue={question?.data_informasi}
+                <RichTextEditor
+                  value={dataInformasi}
+                  onChange={setDataInformasi}
                   placeholder="Jelaskan data/informasi yang diberikan..."
-                  rows={5}
-                  required
+                  editorClassName="[&_.ProseMirror]:min-h-[150px]"
                 />
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="advisory_diinginkan">
                   Advisory Yang Diinginkan
                 </Label>
-                <Textarea
-                  id="advisory_diinginkan"
-                  name="advisory_diinginkan"
-                  defaultValue={question?.advisory_diinginkan}
+                <RichTextEditor
+                  value={advisoryDiinginkan}
+                  onChange={setAdvisoryDiinginkan}
                   placeholder="Jelaskan advisory yang diinginkan..."
-                  rows={5}
-                  required
+                  editorClassName="[&_.ProseMirror]:min-h-[150px]"
                 />
               </div>
             </div>

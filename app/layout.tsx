@@ -1,7 +1,9 @@
 import React from "react"
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 
 import { Analytics } from '@vercel/analytics/next'
+import { ToastProvider } from '@/components/toast-notification'
+import { ErrorBoundary } from '@/components/error-boundary'
 import './globals.css'
 
 import { Geist_Mono, Inter as V0_Font_Inter, Geist_Mono as V0_Font_Geist_Mono, Source_Serif_4 as V0_Font_Source_Serif_4 } from 'next/font/google'
@@ -34,6 +36,13 @@ export const metadata: Metadata = {
   },
 }
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -41,8 +50,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`font-sans antialiased`}>
-        {children}
+      <body className={`font-sans antialiased min-h-screen w-full`}>
+        <ErrorBoundary>
+          <ToastProvider>
+            {children}
+          </ToastProvider>
+        </ErrorBoundary>
         <Analytics />
       </body>
     </html>
