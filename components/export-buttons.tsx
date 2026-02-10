@@ -1,16 +1,19 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ADVISORY_TYPES } from "@/lib/types";
 import type { QuestionWithAnswer } from "@/lib/types";
-import { Download, FileSpreadsheet, ImageIcon, Loader2 } from "lucide-react";
+import { Download, FileSpreadsheet, Loader2 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { htmlToPlainText } from "@/lib/export-utils";
 
@@ -20,6 +23,9 @@ interface ExportButtonsProps {
 
 export function ExportButtons({ questions }: ExportButtonsProps) {
   const [isExporting, setIsExporting] = useState(false);
+  const [exportStatus, setExportStatus] = useState<"all" | "dijawab" | "belum_dijawab">("all");
+  const [exportDateFrom, setExportDateFrom] = useState("");
+  const [exportDateTo, setExportDateTo] = useState("");
 
   function getAdvisoryLabel(id: string) {
     return ADVISORY_TYPES.find((t) => t.id === id)?.label || id;
@@ -33,14 +39,35 @@ export function ExportButtons({ questions }: ExportButtonsProps) {
     });
   }
 
+  const filteredQuestions = useMemo(() => {
+    return questions.filter((q) => {
+      if (exportStatus !== "all" && q.status !== exportStatus) {
+        return false;
+      }
+
+      const requestDate = new Date(q.tanggal_permohonan);
+
+      if (exportDateFrom) {
+        const from = new Date(`${exportDateFrom}T00:00:00`);
+        if (requestDate < from) return false;
+      }
+
+      if (exportDateTo) {
+        const to = new Date(`${exportDateTo}T23:59:59`);
+        if (requestDate > to) return false;
+      }
+
+      return true;
+    });
+  }, [questions, exportStatus, exportDateFrom, exportDateTo]);
+
   async function exportToExcel() {
     setIsExporting(true);
 
     try {
-      const answeredQuestions = questions.filter((q) => q.status === "dijawab" && q.answer);
-
       const summaryHeaders = [
         "No",
+        "Status",
         "No Registrasi",
         "Tanggal Permohonan",
         "Tanggal Jawaban",
@@ -48,13 +75,12 @@ export function ExportButtons({ questions }: ExportButtonsProps) {
         "Divisi/Instansi",
         "Unit Bisnis",
         "Jenis Advisory",
-        "Ringkasan Advisory Diinginkan",
-        "Ringkasan Technical Advisory Note",
         "Dijawab Oleh",
       ];
 
-      const summaryRows = answeredQuestions.map((q, index) => [
+      const summaryRows = filteredQuestions.map((q, index) => [
         index + 1,
+        q.status === "dijawab" ? "Sudah Dijawab" : "Belum Dijawab",
         q.answer?.no_registrasi || "-",
         formatDate(q.tanggal_permohonan),
         q.answer ? formatDate(q.answer.tanggal_jawaban) : "-",
@@ -62,13 +88,12 @@ export function ExportButtons({ questions }: ExportButtonsProps) {
         q.divisi_instansi,
         q.unit_bisnis,
         q.jenis_advisory.map((id) => `${id}. ${getAdvisoryLabel(id)}`).join("; "),
-        htmlToPlainText(q.advisory_diinginkan),
-        htmlToPlainText(q.answer?.technical_advisory_note || "-"),
         q.answerer_name || "-",
       ]);
 
       const detailHeaders = [
         "No",
+        "Status",
         "No Registrasi",
         "Divisi/Instansi",
         "Nama Pemohon",
@@ -81,8 +106,9 @@ export function ExportButtons({ questions }: ExportButtonsProps) {
         "Technical Advisory Note",
       ];
 
-      const detailRows = answeredQuestions.map((q, index) => [
+      const detailRows = filteredQuestions.map((q, index) => [
         index + 1,
+        q.status === "dijawab" ? "Sudah Dijawab" : "Belum Dijawab",
         q.answer?.no_registrasi || "-",
         q.divisi_instansi,
         q.nama_pemohon,
@@ -101,20 +127,20 @@ export function ExportButtons({ questions }: ExportButtonsProps) {
       summarySheet["!cols"] = [
         { wch: 5 },
         { wch: 16 },
+        { wch: 16 },
         { wch: 18 },
         { wch: 18 },
         { wch: 22 },
         { wch: 22 },
         { wch: 20 },
         { wch: 34 },
-        { wch: 42 },
-        { wch: 42 },
         { wch: 18 },
       ];
 
       const detailSheet = XLSX.utils.aoa_to_sheet([detailHeaders, ...detailRows]);
       detailSheet["!cols"] = [
         { wch: 5 },
+        { wch: 16 },
         { wch: 16 },
         { wch: 20 },
         { wch: 20 },
@@ -127,123 +153,13 @@ export function ExportButtons({ questions }: ExportButtonsProps) {
         { wch: 45 },
       ];
 
-      XLSX.utils.book_append_sheet(wb, summarySheet, "Ringkasan Jawaban");
-      XLSX.utils.book_append_sheet(wb, detailSheet, "Tabel Detail Jawaban");
+      XLSX.utils.book_append_sheet(wb, summarySheet, "Ringkasan Pertanyaan");
+      XLSX.utils.book_append_sheet(wb, detailSheet, "Detail Pertanyaan");
 
       XLSX.writeFile(
         wb,
-        `semua-jawaban-advisory-${new Date().toISOString().split("T")[0]}.xlsx`,
+        `semua-pertanyaan-advisory-${new Date().toISOString().split("T")[0]}.xlsx`,
       );
-    } catch (error) {
-      console.error("Export error:", error);
-    } finally {
-      setIsExporting(false);
-    }
-  }
-
-  async function exportToImage() {
-    setIsExporting(true);
-
-    try {
-      // Create a canvas for the image
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-
-      const padding = 40;
-      const rowHeight = 30;
-      const headerHeight = 50;
-      const columnWidths = [40, 100, 150, 150, 150, 100, 120];
-      const totalWidth = columnWidths.reduce((a, b) => a + b, 0) + padding * 2;
-      const totalHeight =
-        headerHeight + rowHeight * (questions.length + 1) + padding * 2;
-
-      canvas.width = totalWidth;
-      canvas.height = totalHeight;
-
-      // Background
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, totalWidth, totalHeight);
-
-      // Title
-      ctx.fillStyle = "#1f2937";
-      ctx.font = "bold 18px sans-serif";
-      ctx.fillText("Daftar Pertanyaan Advisory", padding, padding + 20);
-
-      // Headers
-      const headers = [
-        "No",
-        "Tanggal",
-        "Pemohon",
-        "Divisi",
-        "Unit Bisnis",
-        "Status",
-        "No Reg",
-      ];
-
-      ctx.fillStyle = "#f3f4f6";
-      ctx.fillRect(
-        padding,
-        padding + headerHeight,
-        totalWidth - padding * 2,
-        rowHeight
-      );
-
-      ctx.fillStyle = "#374151";
-      ctx.font = "bold 12px sans-serif";
-      let xPos = padding + 10;
-      headers.forEach((header, i) => {
-        ctx.fillText(header, xPos, padding + headerHeight + 20);
-        xPos += columnWidths[i];
-      });
-
-      // Data rows
-      ctx.font = "12px sans-serif";
-      questions.forEach((q, index) => {
-        const y = padding + headerHeight + rowHeight * (index + 1);
-
-        // Alternate row colors
-        if (index % 2 === 1) {
-          ctx.fillStyle = "#f9fafb";
-          ctx.fillRect(padding, y, totalWidth - padding * 2, rowHeight);
-        }
-
-        ctx.fillStyle = "#374151";
-        xPos = padding + 10;
-
-        const rowData = [
-          String(index + 1),
-          formatDate(q.tanggal_permohonan),
-          q.nama_pemohon.substring(0, 20),
-          q.divisi_instansi.substring(0, 20),
-          q.unit_bisnis.substring(0, 20),
-          q.status === "dijawab" ? "Dijawab" : "Pending",
-          q.answer?.no_registrasi || "-",
-        ];
-
-        rowData.forEach((cell, i) => {
-          ctx.fillText(cell, xPos, y + 20);
-          xPos += columnWidths[i];
-        });
-      });
-
-      // Border
-      ctx.strokeStyle = "#e5e7eb";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(
-        padding,
-        padding + headerHeight,
-        totalWidth - padding * 2,
-        rowHeight * (questions.length + 1)
-      );
-
-      // Download
-      const link = document.createElement("a");
-      link.download = `advisory_questions_${new Date().toISOString().split("T")[0]}.png`;
-      link.href = canvas.toDataURL("image/png");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
     } catch (error) {
       console.error("Export error:", error);
     } finally {
@@ -252,32 +168,69 @@ export function ExportButtons({ questions }: ExportButtonsProps) {
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" disabled={isExporting || questions.length === 0}>
-          {isExporting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Mengekspor...
-            </>
-          ) : (
-            <>
-              <Download className="mr-2 h-4 w-4" />
-              Ekspor Data
-            </>
-          )}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={exportToExcel}>
-          <FileSpreadsheet className="mr-2 h-4 w-4" />
-          Ekspor semua jawaban (XLSX)
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={exportToImage}>
-          <ImageIcon className="mr-2 h-4 w-4" />
-          Ekspor ke Gambar (PNG)
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="border rounded-lg p-4 bg-card">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2 text-sm font-medium">
+          <FileSpreadsheet className="h-4 w-4" />
+          Ekspor Semua Pertanyaan (Penjawab)
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="flex flex-col gap-2">
+            <Label className="text-xs">Kategori Status</Label>
+            <Select value={exportStatus} onValueChange={(value: "all" | "dijawab" | "belum_dijawab") => setExportStatus(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Pilih status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Keduanya</SelectItem>
+                <SelectItem value="dijawab">Sudah Dijawab</SelectItem>
+                <SelectItem value="belum_dijawab">Belum Dijawab</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label className="text-xs">Dari Tanggal</Label>
+            <Input
+              type="date"
+              value={exportDateFrom}
+              onChange={(e) => setExportDateFrom(e.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label className="text-xs">Sampai Tanggal</Label>
+            <Input
+              type="date"
+              value={exportDateTo}
+              onChange={(e) => setExportDateTo(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground">
+            Data siap diekspor: <span className="font-semibold">{filteredQuestions.length}</span> pertanyaan
+          </p>
+          <Button
+            onClick={exportToExcel}
+            disabled={isExporting || filteredQuestions.length === 0}
+          >
+            {isExporting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Mengekspor...
+              </>
+            ) : (
+              <>
+                <Download className="mr-2 h-4 w-4" />
+                Ekspor XLSX
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }

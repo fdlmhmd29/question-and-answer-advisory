@@ -279,6 +279,91 @@ export async function getQuestions(
   }
 }
 
+
+
+export async function getQuestionsForExport(
+  userId: string,
+  role: "penanya" | "penjawab",
+  filter: Omit<QuestionFilter, "page">
+): Promise<QuestionWithAnswer[]> {
+  try {
+    let whereClause = role === "penanya" ? `q.user_id = '${userId}'` : "1=1";
+
+    if (filter.status && filter.status !== "all") {
+      whereClause += ` AND q.status = '${filter.status}'`;
+    }
+
+    if (filter.search) {
+      const searchTerm = filter.search.replace(/'/g, "''");
+      whereClause += ` AND (
+        q.divisi_instansi ILIKE '%${searchTerm}%' OR
+        q.nama_pemohon ILIKE '%${searchTerm}%' OR
+        q.unit_bisnis ILIKE '%${searchTerm}%' OR
+        q.data_informasi ILIKE '%${searchTerm}%'
+      )`;
+    }
+
+    if (filter.dateFrom) {
+      whereClause += ` AND q.tanggal_permohonan >= '${filter.dateFrom}'`;
+    }
+
+    if (filter.dateTo) {
+      whereClause += ` AND q.tanggal_permohonan <= '${filter.dateTo}'`;
+    }
+
+    const orderBy = filter.sortBy === "oldest" ? "ASC" : "DESC";
+
+    const questions = await sql`
+      SELECT
+        q.*,
+        a.id as answer_id,
+        a.no_registrasi,
+        a.tanggal_jawaban,
+        a.technical_advisory_note,
+        a.created_at as answer_created_at,
+        u.name as answerer_name
+      FROM questions q
+      LEFT JOIN answers a ON q.id = a.question_id
+      LEFT JOIN users u ON a.user_id = u.id
+      WHERE ${sql.unsafe(whereClause)}
+      ORDER BY q.tanggal_permohonan ${sql.unsafe(orderBy)}
+    `;
+
+    return questions.map((q) => ({
+      id: q.id,
+      user_id: q.user_id,
+      divisi_instansi: q.divisi_instansi,
+      nama_pemohon: q.nama_pemohon,
+      unit_bisnis: q.unit_bisnis,
+      tanggal_permohonan: new Date(q.tanggal_permohonan),
+      data_informasi: q.data_informasi,
+      advisory_diinginkan: q.advisory_diinginkan,
+      jenis_advisory:
+        typeof q.jenis_advisory === "string"
+          ? JSON.parse(q.jenis_advisory)
+          : q.jenis_advisory,
+      status: q.status,
+      created_at: new Date(q.created_at),
+      updated_at: new Date(q.updated_at),
+      answer: q.answer_id
+        ? {
+            id: q.answer_id,
+            question_id: q.id,
+            answerer_id: "",
+            no_registrasi: q.no_registrasi,
+            tanggal_jawaban: new Date(q.tanggal_jawaban),
+            technical_advisory_note: q.technical_advisory_note,
+            created_at: new Date(q.answer_created_at),
+          }
+        : undefined,
+      answerer_name: q.answerer_name,
+    }));
+  } catch (error) {
+    console.error("Get questions for export error:", error);
+    return [];
+  }
+}
+
 export async function getQuestionById(
   questionId: string
 ): Promise<QuestionWithAnswer | null> {

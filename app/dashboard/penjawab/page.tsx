@@ -1,12 +1,13 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
-import { getQuestions, getQuestionCounts } from "@/lib/questions";
+import { getQuestions, getQuestionCounts, getQuestionsForExport } from "@/lib/questions";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { QuestionsTable } from "@/components/questions-table";
 import { PenjawabAddQuestionButton } from "@/components/penjawab-add-question-button";
 import type { QuestionFilter } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileQuestion, CheckCircle, Clock } from "lucide-react";
+import { ExportButtons } from "@/components/export-buttons";
 
 interface PageProps {
   searchParams: Promise<{
@@ -41,9 +42,16 @@ export default async function PenjawabDashboard({ searchParams }: PageProps) {
     page: parseInt(params.page || "1"),
   };
 
-  const [{ questions, totalPages, totalCount }, counts] = await Promise.all([
+  const [{ questions, totalPages, totalCount }, counts, exportQuestions] = await Promise.all([
     getQuestions(session.user.id, "penjawab", filter),
     getQuestionCounts(),
+    getQuestionsForExport(session.user.id, "penjawab", {
+      status: "all",
+      sortBy: "newest",
+      search: "",
+      dateFrom: "",
+      dateTo: "",
+    }),
   ]);
 
   return (
@@ -60,7 +68,9 @@ export default async function PenjawabDashboard({ searchParams }: PageProps) {
                 Kelola dan jawab permohonan advisory
               </p>
             </div>
-            <PenjawabAddQuestionButton />
+            <div className="flex items-center gap-2">
+              <PenjawabAddQuestionButton />
+            </div>
           </div>
 
           {/* Stats Cards - total keseluruhan, belum dijawab, sudah dijawab (global) */}
@@ -103,6 +113,8 @@ export default async function PenjawabDashboard({ searchParams }: PageProps) {
               </CardContent>
             </Card>
           </div>
+
+          <ExportButtons questions={exportQuestions} />
 
           {/* Questions Table */}
           <QuestionsTable
