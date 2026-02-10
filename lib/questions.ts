@@ -5,6 +5,29 @@ const sql = neon(process.env.DATABASE_URL!);
 
 const ITEMS_PER_PAGE = 5;
 
+
+export async function getOrCreatePublicPenanyaUserId(): Promise<string> {
+  try {
+    const email = "public-penanya@advisory.local";
+
+    const existing = await sql`SELECT id FROM users WHERE email = ${email} LIMIT 1`;
+    if (existing.length > 0) {
+      return String(existing[0].id);
+    }
+
+    const created = await sql`
+      INSERT INTO users (email, password_hash, name, role)
+      VALUES (${email}, 'public-access-only', 'Penanya Publik', 'penanya')
+      RETURNING id
+    `;
+
+    return String(created[0].id);
+  } catch (error) {
+    console.error("Get or create public penanya error:", error);
+    throw new Error("Gagal menyiapkan akun publik");
+  }
+}
+
 /** Untuk dashboard penjawab: total, belum dijawab, sudah dijawab (global, bukan per halaman). */
 export async function getQuestionCounts(): Promise<{
   total: number;

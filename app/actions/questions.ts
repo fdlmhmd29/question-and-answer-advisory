@@ -8,6 +8,7 @@ import {
   deleteQuestion,
   answerQuestion,
   getNextRegistrationNumber,
+  getOrCreatePublicPenanyaUserId,
 } from "@/lib/questions";
 
 export async function submitQuestion(formData: FormData) {
@@ -51,6 +52,57 @@ export async function submitQuestion(formData: FormData) {
   revalidatePath("/dashboard/penanya", "max");
   revalidatePath("/dashboard/penjawab", "max");
   return { success: true };
+}
+
+
+
+export async function submitPublicQuestion(formData: FormData) {
+  const divisi_instansi = formData.get("divisi_instansi") as string;
+  const nama_pemohon = formData.get("nama_pemohon") as string;
+  const unit_bisnis = formData.get("unit_bisnis") as string;
+  const data_informasi = formData.get("data_informasi") as string;
+  const advisory_diinginkan = formData.get("advisory_diinginkan") as string;
+  const jenis_advisory = formData.getAll("jenis_advisory") as string[];
+
+  if (
+    !divisi_instansi ||
+    !nama_pemohon ||
+    !unit_bisnis ||
+    !data_informasi ||
+    !advisory_diinginkan ||
+    jenis_advisory.length === 0
+  ) {
+    return { error: "Semua field pertanyaan harus diisi" };
+  }
+
+  try {
+    const publicUserId = await getOrCreatePublicPenanyaUserId();
+
+    const result = await createQuestion(publicUserId, {
+      divisi_instansi,
+      nama_pemohon,
+      unit_bisnis,
+      data_informasi,
+      advisory_diinginkan,
+      jenis_advisory,
+    });
+
+    if (!result.success) {
+      return { error: result.error };
+    }
+
+    revalidatePath("/", "max");
+    revalidatePath("/dashboard/penjawab", "max");
+
+    return {
+      success: true,
+      message:
+        "Pertanyaan berhasil dikirim tanpa login. Anda dapat login/register untuk memantau status dan riwayat.",
+    };
+  } catch (error) {
+    console.error("Submit public question error:", error);
+    return { error: "Terjadi kesalahan saat mengirim pertanyaan" };
+  }
 }
 
 export async function editQuestion(questionId: string, formData: FormData) {

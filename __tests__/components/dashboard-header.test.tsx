@@ -10,8 +10,8 @@ jest.mock('@/app/actions/auth', () => ({
 
 // Mock next/link
 jest.mock('next/link', () => {
-  return ({ children, href }: any) => {
-    return <a href={href}>{children}</a>
+  return ({ children, href, ...props }: any) => {
+    return <a href={href} {...props}>{children}</a>
   }
 })
 
