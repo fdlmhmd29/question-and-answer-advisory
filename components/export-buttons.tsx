@@ -11,6 +11,8 @@ import {
 import { ADVISORY_TYPES } from "@/lib/types";
 import type { QuestionWithAnswer } from "@/lib/types";
 import { Download, FileSpreadsheet, ImageIcon, Loader2 } from "lucide-react";
+import * as XLSX from "xlsx";
+import { htmlToPlainText } from "@/lib/export-utils";
 
 interface ExportButtonsProps {
   questions: QuestionWithAnswer[];
@@ -35,58 +37,103 @@ export function ExportButtons({ questions }: ExportButtonsProps) {
     setIsExporting(true);
 
     try {
-      // Create CSV content
-      const headers = [
+      const answeredQuestions = questions.filter((q) => q.status === "dijawab" && q.answer);
+
+      const summaryHeaders = [
         "No",
+        "No Registrasi",
         "Tanggal Permohonan",
+        "Tanggal Jawaban",
         "Nama Pemohon",
         "Divisi/Instansi",
         "Unit Bisnis",
         "Jenis Advisory",
-        "Data/Informasi",
-        "Advisory Diinginkan",
-        "Status",
-        "No Registrasi",
-        "Tanggal Jawaban",
-        "Technical Advisory Note",
+        "Ringkasan Advisory Diinginkan",
+        "Ringkasan Technical Advisory Note",
+        "Dijawab Oleh",
       ];
 
-      const rows = questions.map((q, index) => [
+      const summaryRows = answeredQuestions.map((q, index) => [
         index + 1,
+        q.answer?.no_registrasi || "-",
         formatDate(q.tanggal_permohonan),
+        q.answer ? formatDate(q.answer.tanggal_jawaban) : "-",
         q.nama_pemohon,
         q.divisi_instansi,
         q.unit_bisnis,
         q.jenis_advisory.map((id) => `${id}. ${getAdvisoryLabel(id)}`).join("; "),
-        q.data_informasi.replace(/"/g, '""'),
-        q.advisory_diinginkan.replace(/"/g, '""'),
-        q.status === "dijawab" ? "Sudah Dijawab" : "Belum Dijawab",
-        q.answer?.no_registrasi || "-",
-        q.answer ? formatDate(q.answer.tanggal_jawaban) : "-",
-        q.answer?.technical_advisory_note?.replace(/"/g, '""') || "-",
+        htmlToPlainText(q.advisory_diinginkan),
+        htmlToPlainText(q.answer?.technical_advisory_note || "-"),
+        q.answerer_name || "-",
       ]);
 
-      const csvContent = [
-        headers.join(","),
-        ...rows.map((row) =>
-          row.map((cell) => `"${cell}"`).join(",")
-        ),
-      ].join("\n");
+      const detailHeaders = [
+        "No",
+        "No Registrasi",
+        "Divisi/Instansi",
+        "Nama Pemohon",
+        "Unit Bisnis",
+        "Hari/Tanggal Permohonan",
+        "Hari/Tanggal Jawaban",
+        "Jenis Advisory",
+        "Data/Informasi Yang Diberikan",
+        "Advisory Yang Diinginkan",
+        "Technical Advisory Note",
+      ];
 
-      // Add BOM for Excel UTF-8 compatibility
-      const BOM = "\uFEFF";
-      const blob = new Blob([BOM + csvContent], {
-        type: "text/csv;charset=utf-8;",
-      });
+      const detailRows = answeredQuestions.map((q, index) => [
+        index + 1,
+        q.answer?.no_registrasi || "-",
+        q.divisi_instansi,
+        q.nama_pemohon,
+        q.unit_bisnis,
+        formatDate(q.tanggal_permohonan),
+        q.answer ? formatDate(q.answer.tanggal_jawaban) : "-",
+        q.jenis_advisory.map((id) => `${id}. ${getAdvisoryLabel(id)}`).join("; "),
+        htmlToPlainText(q.data_informasi),
+        htmlToPlainText(q.advisory_diinginkan),
+        htmlToPlainText(q.answer?.technical_advisory_note || "-"),
+      ]);
 
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `advisory_questions_${new Date().toISOString().split("T")[0]}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      const wb = XLSX.utils.book_new();
+
+      const summarySheet = XLSX.utils.aoa_to_sheet([summaryHeaders, ...summaryRows]);
+      summarySheet["!cols"] = [
+        { wch: 5 },
+        { wch: 16 },
+        { wch: 18 },
+        { wch: 18 },
+        { wch: 22 },
+        { wch: 22 },
+        { wch: 20 },
+        { wch: 34 },
+        { wch: 42 },
+        { wch: 42 },
+        { wch: 18 },
+      ];
+
+      const detailSheet = XLSX.utils.aoa_to_sheet([detailHeaders, ...detailRows]);
+      detailSheet["!cols"] = [
+        { wch: 5 },
+        { wch: 16 },
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 18 },
+        { wch: 18 },
+        { wch: 32 },
+        { wch: 45 },
+        { wch: 45 },
+        { wch: 45 },
+      ];
+
+      XLSX.utils.book_append_sheet(wb, summarySheet, "Ringkasan Jawaban");
+      XLSX.utils.book_append_sheet(wb, detailSheet, "Tabel Detail Jawaban");
+
+      XLSX.writeFile(
+        wb,
+        `semua-jawaban-advisory-${new Date().toISOString().split("T")[0]}.xlsx`,
+      );
     } catch (error) {
       console.error("Export error:", error);
     } finally {
@@ -224,7 +271,7 @@ export function ExportButtons({ questions }: ExportButtonsProps) {
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={exportToExcel}>
           <FileSpreadsheet className="mr-2 h-4 w-4" />
-          Ekspor ke Excel (CSV)
+          Ekspor semua jawaban (XLSX)
         </DropdownMenuItem>
         <DropdownMenuItem onClick={exportToImage}>
           <ImageIcon className="mr-2 h-4 w-4" />

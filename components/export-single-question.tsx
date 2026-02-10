@@ -9,11 +9,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Download, ImageIcon, Loader2 } from "lucide-react";
+import { Download, FileSpreadsheet, ImageIcon, Loader2 } from "lucide-react";
 import { ADVISORY_TYPES } from "@/lib/types";
 import type { QuestionWithAnswer } from "@/lib/types";
 import { HtmlContent } from "@/components/html-content";
+import { htmlToPlainText } from "@/lib/export-utils";
+import * as XLSX from "xlsx";
 
 interface ExportSingleQuestionProps {
   question: QuestionWithAnswer;
@@ -37,26 +38,58 @@ export function ExportSingleQuestion({ question }: ExportSingleQuestionProps) {
     });
   }
 
-  function htmlToPlainText(content: string) {
-    if (!content) return "";
 
-    const container = document.createElement("div");
-    container.innerHTML = content;
 
-    container.querySelectorAll("br").forEach((br) => br.replaceWith("\n"));
-    container.querySelectorAll("li").forEach((li) => {
-      li.insertBefore(document.createTextNode("• "), li.firstChild);
-      li.appendChild(document.createTextNode("\n"));
-    });
+  async function handleExportXlsx() {
+    if (typeof window === "undefined") return;
 
-    container.querySelectorAll("p, div").forEach((block) => {
-      block.appendChild(document.createTextNode("\n"));
-    });
+    setIsExporting(true);
 
-    return (container.textContent || "")
-      .replace(/\u00a0/g, " ")
-      .replace(/\n{3,}/g, "\n\n")
-      .trim();
+    try {
+      const wsData: (string | number)[][] = [];
+
+      wsData.push(["", "", "TECHNICAL ADVISORY NOTE", "", ""]);
+      wsData.push(["Divisi/Instansi Pemohon", ":", question.divisi_instansi, "Data / Informasi Yang diberikan:", htmlToPlainText(question.data_informasi)]);
+      wsData.push(["Nama Pemohon", ":", question.nama_pemohon, "", ""]);
+      wsData.push(["Unit Bisnis/Proyek/Anak Usaha", ":", question.unit_bisnis, "", ""]);
+      wsData.push(["Hari / Tanggal Permohonan", ":", formatDate(question.tanggal_permohonan), "", ""]);
+      wsData.push(["Hari / Tanggal Jawaban / Advisory", ":", question.answer ? formatDate(question.answer.tanggal_jawaban) : "-", "", ""]);
+      wsData.push(["Media Komunikasi", ":", "-", "", ""]);
+      wsData.push(["No Registrasi", ":", question.answer?.no_registrasi || "-", "", ""]);
+      wsData.push(["Jenis Advisory (bisa pilih > 1)", "", "", "Advisory yang diinginkan:", htmlToPlainText(question.advisory_diinginkan)]);
+
+      for (const advType of ADVISORY_TYPES) {
+        const selected = question.jenis_advisory.includes(advType.id) ? "X" : "";
+        wsData.push([`${advType.id}. ${advType.label}`, ":", selected, "", ""]);
+      }
+
+      wsData[9][3] = "Technical Advisory Note:";
+      wsData[9][4] = htmlToPlainText(question.answer?.technical_advisory_note || "-");
+
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      ws["!cols"] = [
+        { wch: 38 },
+        { wch: 3 },
+        { wch: 22 },
+        { wch: 32 },
+        { wch: 52 },
+      ];
+      ws["!merges"] = [
+        { s: { r: 0, c: 2 }, e: { r: 0, c: 4 } },
+      ];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Technical Advisory");
+
+      XLSX.writeFile(
+        wb,
+        `technical-advisory-${question.answer?.no_registrasi?.replace(/\//g, "-") || question.id}.xlsx`,
+      );
+    } catch (error) {
+      console.error("Export XLSX error:", error);
+    } finally {
+      setIsExporting(false);
+    }
   }
 
   async function handleExportImage() {
@@ -524,6 +557,19 @@ export function ExportSingleQuestion({ question }: ExportSingleQuestionProps) {
         <div className="flex justify-start gap-2 mt-4">
           <Button variant="outline" onClick={() => setOpen(false)}>
             Tutup
+          </Button>
+          <Button variant="outline" onClick={handleExportXlsx} disabled={isExporting}>
+            {isExporting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Mengekspor...
+              </>
+            ) : (
+              <>
+                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                Download XLSX
+              </>
+            )}
           </Button>
           <Button onClick={handleExportImage} disabled={isExporting}>
             {isExporting ? (
