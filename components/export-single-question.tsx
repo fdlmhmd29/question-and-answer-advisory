@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Download, ImageIcon, Loader2 } from "lucide-react";
 import { ADVISORY_TYPES } from "@/lib/types";
 import type { QuestionWithAnswer } from "@/lib/types";
+import { HtmlContent } from "@/components/html-content";
 
 interface ExportSingleQuestionProps {
   question: QuestionWithAnswer;
@@ -34,6 +35,28 @@ export function ExportSingleQuestion({ question }: ExportSingleQuestionProps) {
       month: "long",
       year: "numeric",
     });
+  }
+
+  function htmlToPlainText(content: string) {
+    if (!content) return "";
+
+    const container = document.createElement("div");
+    container.innerHTML = content;
+
+    container.querySelectorAll("br").forEach((br) => br.replaceWith("\n"));
+    container.querySelectorAll("li").forEach((li) => {
+      li.insertBefore(document.createTextNode("• "), li.firstChild);
+      li.appendChild(document.createTextNode("\n"));
+    });
+
+    container.querySelectorAll("p, div").forEach((block) => {
+      block.appendChild(document.createTextNode("\n"));
+    });
+
+    return (container.textContent || "")
+      .replace(/\u00a0/g, " ")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
   }
 
   async function handleExportImage() {
@@ -196,7 +219,7 @@ export function ExportSingleQuestion({ question }: ExportSingleQuestionProps) {
         "13px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
       y =
         wrapText(
-          question.data_informasi,
+          htmlToPlainText(question.data_informasi),
           leftX,
           y,
           width / 2 - padding,
@@ -216,7 +239,7 @@ export function ExportSingleQuestion({ question }: ExportSingleQuestionProps) {
         "13px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
       const leftBottomY =
         wrapText(
-          question.advisory_diinginkan,
+          htmlToPlainText(question.advisory_diinginkan),
           leftX,
           y,
           width / 2 - padding,
@@ -266,7 +289,7 @@ export function ExportSingleQuestion({ question }: ExportSingleQuestionProps) {
         "13px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
       const rightBottomY =
         wrapText(
-          question.answer?.technical_advisory_note || "",
+          htmlToPlainText(question.answer?.technical_advisory_note || ""),
           rightX,
           yRight,
           width / 2 - padding * 1.5,
@@ -431,18 +454,20 @@ export function ExportSingleQuestion({ question }: ExportSingleQuestionProps) {
                   <p className="font-semibold text-slate-700 mb-1">
                     Data/Informasi Yang Diberikan:
                   </p>
-                  <p className="text-slate-600 whitespace-pre-wrap text-xs leading-relaxed bg-slate-50 p-3 rounded border">
-                    {question.data_informasi}
-                  </p>
+                  <HtmlContent
+                    content={question.data_informasi}
+                    className="text-slate-600 text-xs leading-relaxed bg-slate-50 p-3 rounded border [&_p]:my-0 [&_p+p]:mt-2 [&_ul]:my-2 [&_ol]:my-2"
+                  />
                 </div>
 
                 <div>
                   <p className="font-semibold text-slate-700 mb-1">
                     Advisory Yang Diinginkan:
                   </p>
-                  <p className="text-slate-600 whitespace-pre-wrap text-xs leading-relaxed bg-slate-50 p-3 rounded border">
-                    {question.advisory_diinginkan}
-                  </p>
+                  <HtmlContent
+                    content={question.advisory_diinginkan}
+                    className="text-slate-600 text-xs leading-relaxed bg-slate-50 p-3 rounded border [&_p]:my-0 [&_p+p]:mt-2 [&_ul]:my-2 [&_ol]:my-2"
+                  />
                 </div>
               </div>
             </div>
@@ -478,9 +503,10 @@ export function ExportSingleQuestion({ question }: ExportSingleQuestionProps) {
                     Technical Advisory Note :
                   </p>
                   <div className="bg-blue-50 p-4 rounded border-2 border-blue-200 min-h-[200px]">
-                    <p className="text-slate-700 whitespace-pre-wrap text-sm leading-relaxed">
-                      {question.answer.technical_advisory_note}
-                    </p>
+                    <HtmlContent
+                      content={question.answer.technical_advisory_note}
+                      className="text-slate-700 text-sm leading-relaxed [&_p]:my-0 [&_p+p]:mt-2 [&_ul]:my-2 [&_ol]:my-2"
+                    />
                   </div>
                 </div>
               </div>
