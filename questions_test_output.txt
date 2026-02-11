@@ -1,0 +1,65 @@
+
+> my-v0-project@0.1.0 test D:\Coding\Antigravity\question-and-answer-advisory
+> jest "__tests__/lib/questions.test.ts"
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+FAIL __tests__/lib/questions.test.ts
+  Questions Library
+    createQuestion
+      ÔêÜ should create a question successfully (3 ms)
+      ÔêÜ should handle creation error (1 ms)
+    getQuestions
+      ├ù should return questions with pagination (2 ms)
+      ├ù should filter by status
+    answerQuestion
+      ÔêÜ should answer a pending question successfully
+      ÔêÜ should fail if question already answered
+      ÔêÜ should fail if question validation fails (1 ms)
+    updateQuestion
+      ÔêÜ should update question successfully (1 ms)
+      ÔêÜ should fail if question not found or already answered
+    deleteQuestion
+      ÔêÜ should delete pending question
+      ÔêÜ should fail if delete returns no rows (1 ms)
+
+  ÔùÅ Questions Library ÔÇ║ getQuestions ÔÇ║ should return questions with pagination
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 10
+    Received: 0
+
+       96 |             const result = await getQuestions('user-1', 'penanya', { page: 1 })
+       97 |
+    >  98 |             expect(result.totalCount).toBe(10)
+          |                                       ^
+       99 |             expect(result.totalPages).toBe(2) // 10 / 5 items per page
+      100 |             expect(result.questions).toHaveLength(2)
+      101 |         })
+
+      at Object.toBe (__tests__/lib/questions.test.ts:98:39)
+
+  ÔùÅ Questions Library ÔÇ║ getQuestions ÔÇ║ should filter by status
+
+    expect(received).toHaveBeenCalled()
+
+    Matcher error: received value must be a mock or spy function
+
+    Received has value: undefined
+
+      109 |             // Check if sql.unsafe was called with status filter logic (indirectly)
+      110 |             // Since we mock sql.unsafe separately, we can check it
+    > 111 |             expect((mockSql as any).unsafe).toHaveBeenCalled()
+          |                                             ^
+      112 |         })
+      113 |     })
+      114 |
+
+      at Object.toHaveBeenCalled (__tests__/lib/questions.test.ts:111:45)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 9 passed, 11 total
+Snapshots:   0 total
+Time:        1.289 s
+Ran all test suites matching /__tests__\\lib\\questions.test.ts/i.
+ÔÇëELIFECYCLEÔÇë Test failed. See above for more details.

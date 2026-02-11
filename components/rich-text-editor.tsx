@@ -22,7 +22,7 @@ const quillModules = {
   ],
 }
 
-const quillFormats = ['bold', 'italic', 'list', 'bullet']
+const quillFormats = ['bold', 'italic', 'list']
 
 export function RichTextEditor({
   value,

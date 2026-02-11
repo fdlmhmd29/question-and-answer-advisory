@@ -11,9 +11,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RichTextEditor } from "@/components/rich-text-editor";
 import { ADVISORY_TYPES } from "@/lib/types";
-import { Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, MessageSquarePlus, LogIn } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
+
+type View = "select" | "ask" | "login";
 
 export function HomeEntry() {
+  const [view, setView] = useState<View>("select");
+
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isLoginLoading, setIsLoginLoading] = useState(false);
 
@@ -71,50 +76,130 @@ export function HomeEntry() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-muted/30 py-8 px-4">
-      <div className="container mx-auto grid gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle>Masuk ke Akun</CardTitle>
-            <CardDescription>
-              Login langsung dari halaman utama. Belum punya akun? Bisa tetap kirim pertanyaan tanpa login.
+  // ── Selection Screen ──
+  if (view === "select") {
+    return (
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center py-8 px-4">
+        <div className="absolute top-4 right-4">
+          <ThemeToggle />
+        </div>
+        <Card className="w-full max-w-lg animate-fade-in">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Selamat Datang</CardTitle>
+            <CardDescription className="text-base">
+              Silakan pilih salah satu opsi di bawah untuk melanjutkan.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form action={handleLogin} className="flex flex-col gap-4">
-              {loginError && (
-                <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">{loginError}</div>
-              )}
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="home-email">Email</Label>
-                <Input id="home-email" name="email" type="email" placeholder="nama@email.com" required />
+          <CardContent className="flex flex-col gap-4">
+            <button
+              type="button"
+              onClick={() => setView("ask")}
+              className="group flex items-center gap-4 rounded-xl border-2 border-transparent bg-primary/5 p-5 text-left transition-all hover:border-primary hover:shadow-md"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                <MessageSquarePlus className="h-6 w-6" />
               </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="home-password">Password</Label>
-                <Input id="home-password" name="password" type="password" placeholder="Password" required />
+              <div>
+                <p className="font-semibold text-foreground">Langsung Bertanya</p>
+                <p className="text-sm text-muted-foreground">
+                  Kirim pertanyaan tanpa perlu login atau membuat akun.
+                </p>
               </div>
-              <Button type="submit" disabled={isLoginLoading}>
-                {isLoginLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Memproses...</> : "Masuk"}
-              </Button>
-            </form>
+            </button>
 
-            <div className="mt-6 rounded-md border p-3 text-sm">
-              <p className="font-semibold mb-2">Kelebihan jika Register/Login:</p>
-              <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
-                <li>Melihat status jawaban secara real-time.</li>
-                <li>Riwayat pertanyaan tersimpan rapi di dashboard.</li>
-                <li>Bisa edit/hapus pertanyaan sebelum dijawab.</li>
-                <li>Akses fitur ekspor data sesuai kebutuhan.</li>
-              </ul>
-              <Link href="/register" className="inline-block mt-3 text-primary hover:underline">
-                Daftar akun penanya
-              </Link>
-            </div>
+            <button
+              type="button"
+              onClick={() => setView("login")}
+              className="group flex items-center gap-4 rounded-xl border-2 border-transparent bg-primary/5 p-5 text-left transition-all hover:border-primary hover:shadow-md"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                <LogIn className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="font-semibold text-foreground">Masuk / Daftar</p>
+                <p className="text-sm text-muted-foreground">
+                  Login ke akun Anda atau daftar akun baru untuk fitur lengkap.
+                </p>
+              </div>
+            </button>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
 
-        <Card className="lg:col-span-2">
+  // ── Back Button ──
+  const backButton = (
+    <div className="flex items-center justify-between mb-4">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => setView("select")}
+        className="gap-1"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Kembali
+      </Button>
+      <ThemeToggle />
+    </div>
+  );
+
+  // ── Login View ──
+  if (view === "login") {
+    return (
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center py-8 px-4">
+        <div className="w-full max-w-md animate-fade-in">
+          {backButton}
+          <Card>
+            <CardHeader>
+              <CardTitle>Masuk ke Akun</CardTitle>
+              <CardDescription>
+                Login untuk mengakses dashboard dan fitur lengkap.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form action={handleLogin} className="flex flex-col gap-4">
+                {loginError && (
+                  <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">{loginError}</div>
+                )}
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="home-email">Email</Label>
+                  <Input id="home-email" name="email" type="email" placeholder="nama@email.com" required />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="home-password">Password</Label>
+                  <Input id="home-password" name="password" type="password" placeholder="Password" required />
+                </div>
+                <Button type="submit" disabled={isLoginLoading}>
+                  {isLoginLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Memproses...</> : "Masuk"}
+                </Button>
+              </form>
+
+              <div className="mt-6 rounded-md border p-3 text-sm">
+                <p className="font-semibold mb-2">Kelebihan jika Register/Login:</p>
+                <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                  <li>Melihat status jawaban secara real-time.</li>
+                  <li>Riwayat pertanyaan tersimpan rapi di dashboard.</li>
+                  <li>Bisa edit/hapus pertanyaan sebelum dijawab.</li>
+                  <li>Akses fitur ekspor data sesuai kebutuhan.</li>
+                </ul>
+                <Link href="/register" className="inline-block mt-3 text-primary hover:underline">
+                  Daftar akun penanya
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Ask Question View ──
+  return (
+    <div className="min-h-screen bg-muted/30 py-8 px-4">
+      <div className="container mx-auto max-w-3xl animate-fade-in">
+        {backButton}
+        <Card>
           <CardHeader>
             <CardTitle>Kirim Pertanyaan Tanpa Login</CardTitle>
             <CardDescription>

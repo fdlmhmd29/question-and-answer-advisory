@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { registerUser, loginUser, deleteSession } from "@/lib/auth";
+import { registerUser, loginUser, deleteSession, getSession } from "@/lib/auth";
 
 export async function register(formData: FormData) {
   const email = formData.get("email") as string;
@@ -25,7 +25,7 @@ export async function register(formData: FormData) {
 
   // Auto login after register
   const loginResult = await loginUser(email, password);
-  
+
   if (loginResult.success) {
     redirect(role === "penanya" ? "/dashboard/penanya" : "/dashboard/penjawab");
   }
@@ -48,8 +48,8 @@ export async function login(formData: FormData) {
   }
 
   redirect(
-    result.user?.role === "penanya" 
-      ? "/dashboard/penanya" 
+    result.user?.role === "penanya"
+      ? "/dashboard/penanya"
       : "/dashboard/penjawab"
   );
 }

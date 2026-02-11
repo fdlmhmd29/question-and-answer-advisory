@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/app/actions/auth";
 import { LogOut, User, Settings, Menu, X } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useState } from "react";
 
 interface DashboardHeaderProps {
@@ -26,8 +27,9 @@ export function DashboardHeader({ userName, userRole }: DashboardHeaderProps) {
               </p>
             )}
           </div>
-          
+
           {/* Desktop Menu */}
+
           <div className="hidden md:flex items-center gap-2 lg:gap-4">
             {userName && (
               <>
@@ -35,6 +37,7 @@ export function DashboardHeader({ userName, userRole }: DashboardHeaderProps) {
                   <User className="h-3.5 w-3.5 lg:h-4 lg:w-4 flex-shrink-0" />
                   <span className="truncate">{userName}</span>
                 </div>
+                <ThemeToggle />
                 <Link href="/dashboard/profile">
                   <Button variant="outline" size="sm" className="text-xs lg:text-sm">
                     <Settings className="h-3.5 w-3.5 mr-1.5 lg:mr-2" />
@@ -43,6 +46,7 @@ export function DashboardHeader({ userName, userRole }: DashboardHeaderProps) {
                 </Link>
               </>
             )}
+
             <form action={logout}>
               <Button variant="outline" size="sm" className="text-xs lg:text-sm">
                 <LogOut className="h-3.5 w-3.5 mr-1.5 lg:mr-2" />
@@ -82,6 +86,10 @@ export function DashboardHeader({ userName, userRole }: DashboardHeaderProps) {
                 </Link>
               </>
             )}
+            <div className="flex items-center justify-between px-2 py-1">
+              <span className="text-xs text-muted-foreground">Tema</span>
+              <ThemeToggle />
+            </div>
             <form action={logout}>
               <Button variant="outline" size="sm" className="w-full justify-start text-xs">
                 <LogOut className="h-4 w-4 mr-2" />

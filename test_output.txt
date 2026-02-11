@@ -1,0 +1,28 @@
+
+> my-v0-project@0.1.0 test D:\Coding\Antigravity\question-and-answer-advisory
+> jest "__tests__/lib/auth.test.ts"
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+FAIL __tests__/lib/auth.test.ts
+  ÔùÅ Test suite failed to run
+
+    ReferenceError: Cannot access 'mockSql' before initialization
+
+      16 |
+      17 | jest.mock('@neondatabase/serverless', () => ({
+    > 18 |   neon: jest.fn(() => mockSql),
+         |                       ^
+      19 | }))
+      20 |
+      21 | const mockCookiesSet = jest.fn()
+
+      at mockSql (__tests__/lib/auth.test.ts:18:23)
+      at Object.<anonymous> (lib/auth.ts:5:17)
+      at Object.<anonymous> (__tests__/lib/auth.test.ts:15:15)
+
+Test Suites: 1 failed, 1 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        1.468 s
+Ran all test suites matching /__tests__\\lib\\auth.test.ts/i.
+ÔÇëELIFECYCLEÔÇë Test failed. See above for more details.
