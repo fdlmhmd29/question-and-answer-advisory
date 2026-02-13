@@ -192,6 +192,8 @@ export function QuestionForm({
                   Data/Informasi yang Diberikan
                 </Label>
                 <RichTextEditor
+                  id="data_informasi"
+                  name="data_informasi"
                   value={dataInformasi}
                   onChange={setDataInformasi}
                   placeholder="Jelaskan data/informasi yang diberikan..."
@@ -203,6 +205,8 @@ export function QuestionForm({
                   Advisory Yang Diinginkan
                 </Label>
                 <RichTextEditor
+                  id="advisory_diinginkan"
+                  name="advisory_diinginkan"
                   value={advisoryDiinginkan}
                   onChange={setAdvisoryDiinginkan}
                   placeholder="Jelaskan advisory yang diinginkan..."

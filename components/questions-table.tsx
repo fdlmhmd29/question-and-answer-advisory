@@ -148,6 +148,7 @@ export function QuestionsTable({
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="search"
+                name="search"
                 placeholder="Cari..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -161,8 +162,8 @@ export function QuestionsTable({
             <Label htmlFor="status" className="text-xs">
               Status
             </Label>
-            <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger>
+            <Select name="status" value={status} onValueChange={setStatus}>
+              <SelectTrigger id="status">
                 <SelectValue placeholder="Semua status" />
               </SelectTrigger>
               <SelectContent>
@@ -177,8 +178,8 @@ export function QuestionsTable({
             <Label htmlFor="sortBy" className="text-xs">
               Urutan
             </Label>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger>
+            <Select name="sortBy" value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger id="sortBy">
                 <SelectValue placeholder="Urutkan" />
               </SelectTrigger>
               <SelectContent>
@@ -207,6 +208,7 @@ export function QuestionsTable({
             </Label>
             <Input
               id="dateFrom"
+              name="dateFrom"
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
@@ -219,6 +221,7 @@ export function QuestionsTable({
             </Label>
             <Input
               id="dateTo"
+              name="dateTo"
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}

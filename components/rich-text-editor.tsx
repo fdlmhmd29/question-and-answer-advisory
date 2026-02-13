@@ -11,6 +11,8 @@ const ReactQuill = dynamic(() => import('react-quill-new'), {
 interface RichTextEditorProps {
   value: string
   onChange: (value: string) => void
+  id?: string
+  name?: string
   placeholder?: string
   editorClassName?: string
 }
@@ -27,6 +29,8 @@ const quillFormats = ['bold', 'italic', 'list']
 export function RichTextEditor({
   value,
   onChange,
+  id,
+  name,
   placeholder = 'Tulis konten di sini...',
   editorClassName = '',
 }: RichTextEditorProps) {
@@ -34,6 +38,7 @@ export function RichTextEditor({
     <div className="border rounded-md overflow-hidden bg-background">
       <ReactQuill
         theme="snow"
+        id={id}
         value={value}
         onChange={onChange}
         modules={quillModules}
@@ -41,6 +46,7 @@ export function RichTextEditor({
         placeholder={placeholder}
         className={cn('min-h-[150px] [&_.ql-container]:border-0 [&_.ql-editor]:min-h-[150px]', editorClassName)}
       />
+      {name && <input type="hidden" id={id ? `${id}-value` : undefined} name={name} value={value} readOnly />}
     </div>
   )
 }

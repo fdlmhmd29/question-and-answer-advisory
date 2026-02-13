@@ -228,8 +228,10 @@ export function HomeEntry() {
               </div>
 
               <div className="flex flex-col gap-2">
-                <Label>Data/Informasi yang Diberikan</Label>
+                <Label htmlFor="public_data_informasi">Data/Informasi yang Diberikan</Label>
                 <RichTextEditor
+                  id="public_data_informasi"
+                  name="data_informasi"
                   value={dataInformasi}
                   onChange={setDataInformasi}
                   placeholder="Jelaskan data/informasi..."
@@ -237,8 +239,10 @@ export function HomeEntry() {
               </div>
 
               <div className="flex flex-col gap-2">
-                <Label>Advisory Yang Diinginkan</Label>
+                <Label htmlFor="public_advisory_diinginkan">Advisory Yang Diinginkan</Label>
                 <RichTextEditor
+                  id="public_advisory_diinginkan"
+                  name="advisory_diinginkan"
                   value={advisoryDiinginkan}
                   onChange={setAdvisoryDiinginkan}
                   placeholder="Jelaskan advisory yang diinginkan..."
